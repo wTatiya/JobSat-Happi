@@ -1,1 +1,775 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happinometer ฝ่ายการพยาบาล 2568</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #f2f7ff 0%, #fff5f7 35%, #f3fffa 100%);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --primary: #2c3d7a;
+      --accent: #ff8a5b;
+      --accent-2: #2bb1a8;
+      --accent-3: #ffcd4b;
+      --text: #1f2a44;
+      --muted: #5d6a93;
+      --shadow: 0 18px 40px rgba(44, 61, 122, 0.12);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+    }
 
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Prompt", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .dashboard {
+      width: min(1180px, 100%);
+      background: rgba(255, 255, 255, 0.72);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px 48px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 3vw, 2.4rem);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.6;
+    }
+
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .tab-button {
+      flex: 1;
+      min-width: 160px;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tab-button.active {
+      background: linear-gradient(135deg, #2c3d7a, #3c58b9);
+      color: #f7f9ff;
+      box-shadow: 0 12px 30px rgba(60, 88, 185, 0.3);
+    }
+
+    .panel {
+      display: none;
+      animation: fade 0.4s ease;
+    }
+
+    .panel.active {
+      display: grid;
+      gap: 22px;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+      box-shadow: 0 12px 28px rgba(31, 42, 68, 0.1);
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--primary);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(43, 177, 168, 0.16);
+      color: #15766f;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .metric {
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      box-shadow: 0 10px 20px rgba(44, 61, 122, 0.08);
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .metric-title {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .metric-value {
+      font-size: 2.1rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .metric-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(44, 61, 122, 0.08);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--accent), #ff6f91);
+      transition: width 0.6s ease;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .list-item {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      box-shadow: 0 8px 20px rgba(31, 42, 68, 0.08);
+    }
+
+    .list-item strong {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .list-item span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .insight-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255, 205, 75, 0.22);
+      color: #9b6b00;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(43, 177, 168, 0.14);
+      color: #11655f;
+      font-size: 0.85rem;
+      cursor: default;
+    }
+
+    .unit-select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(44, 61, 122, 0.18);
+      font-size: 0.95rem;
+      color: var(--primary);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 4px 12px rgba(31, 42, 68, 0.08);
+    }
+
+    .unit-details {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 16px;
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      box-shadow: 0 8px 20px rgba(31, 42, 68, 0.08);
+    }
+
+    .detail-row span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .detail-row strong {
+      color: var(--primary);
+      font-size: 1.05rem;
+    }
+
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .alert-item {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 138, 91, 0.15);
+      color: #a44a2d;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .attrition-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .attrition-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      padding: 18px 20px;
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      box-shadow: 0 10px 24px rgba(31, 42, 68, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .attrition-card h4 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 1rem;
+    }
+
+    .attrition-card .figure {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    footer {
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    @media (max-width: 780px) {
+      body {
+        padding: 24px 12px 40px;
+      }
+      .dashboard {
+        padding: 28px 20px 40px;
+      }
+      .tab-button {
+        min-width: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <header>
+      <div class="pill">Happinometer &amp; Job Satisfaction 2568</div>
+      <h1>สรุปความสุขและความผูกพันบุคลากรพยาบาลระดับบริหาร</h1>
+      <p>
+        ข้อมูลนี้สังเคราะห์จากผลสำรวจ Happinometer, ความผูกพัน และความพึงพอใจในการทำงานปี 2568 โดยมุ่งเน้นสำหรับผู้บริหารการพยาบาล เพื่อช่วยชี้โอกาสการเสริมพลังทีมและเฝ้าระวังความเสี่ยงด้านบุคลากร
+      </p>
+    </header>
+
+    <nav class="tab-bar">
+      <button class="tab-button active" data-target="overview">ภาพรวมความสุข</button>
+      <button class="tab-button" data-target="satisfaction">ความพึงพอใจงาน</button>
+      <button class="tab-button" data-target="focus">จุดเน้นผู้บริหาร</button>
+      <button class="tab-button" data-target="attrition">การลาออก 2568</button>
+    </nav>
+
+    <section id="overview" class="panel active">
+      <div class="card">
+        <h2>ค่าเด่นจาก Happinometer และความผูกพัน</h2>
+        <div class="grid-3">
+          <div class="metric" style="background: rgba(43, 177, 168, 0.18);">
+            <span class="metric-title">หน่วยที่สร้างประสบการณ์โดดเด่น</span>
+            <span class="metric-value">หอพัก 90.0%</span>
+            <p class="metric-desc">คะแนน Overall Happy สูงที่สุด 90% พร้อมระดับความผูกพัน 73.33% (3.67) แสดงถึงการดูแลชีวิต-งานที่สมดุล</p>
+          </div>
+          <div class="metric" style="background: rgba(255, 205, 75, 0.18);">
+            <span class="metric-title">กลุ่ม OPD ที่เติบโตต่อเนื่อง</span>
+            <span class="metric-value">OPD2 84.3%</span>
+            <p class="metric-desc">คะแนนความสุขรวม 84.29% และความผูกพัน 77.62% สะท้อนการบริหารภาระงานและสวัสดิการที่สมดุล</p>
+          </div>
+          <div class="metric" style="background: rgba(255, 138, 91, 0.18);">
+            <span class="metric-title">หน่วยที่ต้องเร่งฟื้นฟูความสุข</span>
+            <span class="metric-value">PICU 48.9%</span>
+            <p class="metric-desc">คะแนนความสุขรวมต่ำสุด 48.89% แม้ความพึงพอใจงานยังสูง (81%) ต้องเน้นสนับสนุนสุขภาพกายใจและกำลังคน</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>อันดับความสุขรวม (Overall Happy)</h3>
+        <div class="chip-group">
+          <div class="chip">Top: หอพัก 90.0%</div>
+          <div class="chip">Top: OPD2 84.3%</div>
+          <div class="chip">Top: CSSD 81.3%</div>
+          <div class="chip" style="background: rgba(255, 138, 91, 0.18); color: #a44a2d;">Low: PICU 48.9%</div>
+          <div class="chip" style="background: rgba(255, 138, 91, 0.18); color: #a44a2d;">Low: 19C 53.9%</div>
+          <div class="chip" style="background: rgba(255, 138, 91, 0.18); color: #a44a2d;">Low: 20B 57.0%</div>
+        </div>
+        <div class="list">
+          <div class="list-item">
+            <div>
+              <strong>หน่วยที่ขับเคลื่อนประสบการณ์เชิงบวก</strong>
+              <p class="hint">CSSD 81.25%, ปฐมภูมิ 80.0%, OPD3 74.21% ร่วมสร้างต้นแบบทีมสุขภาพจิตดี</p>
+            </div>
+            <span>ดัชนี ≥ 74%</span>
+          </div>
+          <div class="list-item">
+            <div>
+              <strong>พื้นที่ต้องเสริมสุขภาพองค์รวม</strong>
+              <p class="hint">PICU (Relax 52.89%, Happy Plus 48.15%), 20B (Body 62.4%, Relax 48.8%) และ 19C (Relax 50.86%) ต้องเติมพลังงานและระบบสนับสนุน</p>
+            </div>
+            <span>ดัชนี &lt; 60%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>ความผูกพันพนักงาน (Engagement Score)</h3>
+        <div class="insight-grid">
+          <div>
+            <div class="tag">สูงสุด</div>
+            <div class="list" style="margin-top: 10px;">
+              <div class="list-item">
+                <div>
+                  <strong>งานระบาด 93.33%</strong>
+                  <span>คะแนน 4.67 (SD 0.16) สะท้อนผู้นำและภารกิจชัดเจน</span>
+                </div>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>ผู้บริหาร 80.58%</strong>
+                  <span>ความผูกพันสูงควบคู่ความสุข 75.43%</span>
+                </div>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>ปฐมภูมิ 78.67%</strong>
+                  <span>ระบบทีมและ Happy Plus 84% สนับสนุนการรักษาผลงาน</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="tag">เฝ้าระวัง</div>
+            <div class="list" style="margin-top: 10px;">
+              <div class="list-item">
+                <div>
+                  <strong>22A &amp; Stroke 59.39%</strong>
+                  <span>คะแนน Relax 55.27% และ Happy Plus 56.36% บ่งชี้ภาระงานตึง</span>
+                </div>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>20B 59.56%</strong>
+                  <span>Body 62.4% และ Engagement ด้าน Stay เพียง 55.5%</span>
+                </div>
+              </div>
+              <div class="list-item">
+                <div>
+                  <strong>19C 60.71%</strong>
+                  <span>Relax 50.86% ต้องจัดการภาระงานและทรัพยากรสนับสนุน</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="satisfaction" class="panel">
+      <div class="card">
+        <h2>ไฮไลต์ความพึงพอใจในการทำงาน</h2>
+        <div class="grid-3">
+          <div class="metric" style="background: rgba(43, 177, 168, 0.18);">
+            <span class="metric-title">คะแนนรวมสูงสุด</span>
+            <span class="metric-value">สำนักงาน 87.2%</span>
+            <p class="metric-desc">โดดเด่นในสิ่งแวดล้อมการทำงาน (90%) และสวัสดิการ (86%) เป็นต้นแบบพื้นที่สนับสนุน</p>
+          </div>
+          <div class="metric" style="background: rgba(255, 205, 75, 0.18);">
+            <span class="metric-title">หน่วยบริการที่ยังรักษาคะแนนสูง</span>
+            <span class="metric-value">CSSD 83.2%</span>
+            <p class="metric-desc">คะแนนการบังคับบัญชา 85.6% และภาพรวม 83.2% สนับสนุนคุณภาพบริการด่านหลัง</p>
+          </div>
+          <div class="metric" style="background: rgba(255, 138, 91, 0.18);">
+            <span class="metric-title">ประเด็นปานกลาง</span>
+            <span class="metric-value">ER 74.0%</span>
+            <p class="metric-desc">ค่าตอบแทนและสวัสดิการอยู่ในระดับปานกลาง (68.2%) ควรเสริมรางวัลและการดูแลใจ</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>ภาพรวมตามมิติ</h3>
+        <div class="insight-grid">
+          <div class="metric">
+            <span class="metric-title">การบังคับบัญชา</span>
+            <span class="metric-value">เฉลี่ย 3.9 (78%)</span>
+            <p class="metric-desc">หน่วยที่ดีที่สุด: สำนักงาน 87.6%, CSSD 85.6% สะท้อนภาวะผู้นำที่ชัด</p>
+            <div class="hint">ต้องเฝ้าระวัง: ไตเทียม 68.8% (ปานกลาง)</div>
+          </div>
+          <div class="metric">
+            <span class="metric-title">สิ่งแวดล้อมการทำงาน</span>
+            <span class="metric-value">เฉลี่ย 3.9 (78%)</span>
+            <p class="metric-desc">PICU 92.8% และสำนักงาน 90% แสดงความพร้อมด้านทรัพยากรและความปลอดภัย</p>
+            <div class="hint">22A&Stroke 75.6% ยังต่ำกว่าค่าเฉลี่ยหน่วยบริการ</div>
+          </div>
+          <div class="metric">
+            <span class="metric-title">ค่าตอบแทนและสวัสดิการ</span>
+            <span class="metric-value">เฉลี่ย 3.8 (76%)</span>
+            <p class="metric-desc">OPD2 83.4% และ CSSD 82.2% ช่วยรักษากำลังคน</p>
+            <div class="hint">ER 74.6%, ไตเทียม 80.8% (แต่ค่าตอบแทนย่อย 66.8%) ต้องปรับสวัสดิการเชิงแรงจูงใจ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>สรุปจุดเด่นและโอกาส</h3>
+        <div class="insight-grid">
+          <div class="metric" style="background: rgba(43, 177, 168, 0.16);">
+            <span class="metric-title">จุดแข็งที่ต้องต่อยอด</span>
+            <p class="metric-desc">
+              OPD2, CSSD และสำนักงานสร้างคะแนน ≥ 80% ในหลายมิติ แนะนำให้ใช้เป็นพื้นที่เรียนรู้ร่วมเพื่อถ่ายทอดแนวทางบริหารทีมและการดูแลทรัพยากร
+            </p>
+          </div>
+          <div class="metric" style="background: rgba(255, 205, 75, 0.16);">
+            <span class="metric-title">โอกาสพัฒนาเชิงระบบ</span>
+            <p class="metric-desc">
+              มิติ “ค่าตอบแทนและสวัสดิการ” ของ ER (68.2%) และไตเทียม (66.8%) พร้อมมิติ “ลักษณะงาน” ของ SICU (67.8%) สะท้อนความต้องการเสริมกำลังคนและการชดเชยภาระงาน
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="focus" class="panel">
+      <div class="card">
+        <h2>แดชบอร์ดโฟกัสสำหรับผู้บริหาร</h2>
+        <p class="hint">เลือกหน่วยงานเพื่อดูสรุปคะแนนสำคัญและสัญญาณเตือน</p>
+        <select class="unit-select" id="unitSelect">
+          <option value="หอพัก">หอพัก</option>
+          <option value="OPD2">OPD2</option>
+          <option value="CSSD">CSSD</option>
+          <option value="PICU">PICU</option>
+          <option value="20B">20B</option>
+          <option value="ER">ER</option>
+          <option value="ไตเทียม">ไตเทียม</option>
+          <option value="SICU">SICU</option>
+        </select>
+        <div class="unit-details" id="unitDetails">
+          <div class="detail-row">
+            <span>ความสุขรวม (Happinometer)</span>
+            <strong id="happyScore">90.0%</strong>
+          </div>
+          <div class="detail-row">
+            <span>ความผูกพัน (Employee Engagement)</span>
+            <strong id="engagementScore">73.33%</strong>
+          </div>
+          <div class="detail-row">
+            <span>ความพึงพอใจงาน (ภาพรวม)</span>
+            <strong id="jobScore">ไม่มีข้อมูล</strong>
+          </div>
+          <div>
+            <div class="tag">สัญญาณที่ควรจับตา</div>
+            <div class="alert-list" id="alertList">
+              <div class="alert-item">ข้อมูลครบถ้วนและอยู่ในระดับแข็งแรง</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>ประเด็นยุทธศาสตร์ที่ควรขับเคลื่อน</h3>
+        <div class="insight-grid">
+          <div class="metric">
+            <span class="metric-title">1. เสริมสุขภาพกายใจในหน่วยวิกฤต</span>
+            <p class="metric-desc">PICU, 20B และ 19C มีมิติ Relax &amp; Happy Plus ต่ำกว่า 55% แนะนำจัดโครงการพี่เลี้ยงและเวลาพักเชิงรุก</p>
+          </div>
+          <div class="metric">
+            <span class="metric-title">2. จัดการภาระงานและทรัพยากร</span>
+            <p class="metric-desc">SICU และ ER มีคะแนนลักษณะงานและค่าตอบแทนระดับปานกลาง ต้องพิจารณาปรับสัดส่วนเวรและเครื่องมือสนับสนุน</p>
+          </div>
+          <div class="metric">
+            <span class="metric-title">3. ต่อยอดทีมต้นแบบ</span>
+            <p class="metric-desc">นำแนวทางจาก OPD2, CSSD และสำนักงาน (คะแนน ≥ 83%) มาใช้เป็นโครงการ Coach the Coach สร้างมาตรฐานการดูแลบุคลากร</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="attrition" class="panel">
+      <div class="card">
+        <h2>ภาพรวมการลาออกของบุคลากร (รวม 53 คน)</h2>
+        <div class="attrition-grid">
+          <div class="attrition-card">
+            <h4>หน่วยที่มีการลาออกสูงสุด</h4>
+            <div class="figure">OR 6 คน</div>
+            <p class="hint">ประกอบด้วย N 4 คน และ PN 2 คน จำเป็นต้องทบทวนแผนเวรและสวัสดิการเฉพาะ</p>
+          </div>
+          <div class="attrition-card">
+            <h4>หน่วยเสี่ยงระดับกลาง</h4>
+            <div class="figure">MICU / DR / บางพระ 3 คน</div>
+            <p class="hint">MICU สูญเสีย N 2 คน PN 1 คน สัมพันธ์กับคะแนน Relax 52.79% และ Stay 60%</p>
+          </div>
+          <div class="attrition-card">
+            <h4>กระจายหลายหน่วยงาน</h4>
+            <div class="figure">18D, Refer, 23A, 22A ฯลฯ</div>
+            <p class="hint">แต่ละหน่วยออก 2-3 คน ควรเชื่อมโยงข้อมูลลาออกกับคะแนนค่าตอบแทนและ Engagement เพื่อจัดแผนรักษาคน</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>ข้อเสนอแนะการจัดการกำลังคน</h3>
+        <div class="insight-grid">
+          <div class="metric">
+            <span class="metric-title">พยาบาลวิกฤต</span>
+            <p class="metric-desc">OR และ MICU ควรรวมทีมผู้เชี่ยวชาญเพื่อทบทวนระบบพี่เลี้ยงและค่าตอบแทนเสี่ยงภัยเชื่อมกับคะแนน Happinometer</p>
+          </div>
+          <div class="metric">
+            <span class="metric-title">หน่วยบริการนอกเวลา</span>
+            <p class="metric-desc">บางพระและ Refer มีการลาออก 3 และ 2 คนตามลำดับ ต้องตรวจสอบภาระงานนอกเวลารวมถึงแรงจูงใจเพิ่มเติม</p>
+          </div>
+          <div class="metric">
+            <span class="metric-title">การสื่อสารกับบุคลากรใหม่</span>
+            <p class="metric-desc">เชื่อมข้อมูลลาออกของ PN และ NA รวม 22 คน กับโครงการ Onboarding เพื่อเสริมความผูกพันตั้งแต่ 90 วันแรก</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>ที่มา: รายงาน Happinometer, การผูกพัน และ Job Satisfaction ฝ่ายการพยาบาล ปี 2568</footer>
+  </main>
+
+  <script>
+    const unitsData = {
+      "หอพัก": {
+        happy: "90.0%",
+        engagement: "73.33%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "คะแนนสุขภาวะองค์รวมสูงทุกมิติ เหมาะเป็นพื้นที่แลกเปลี่ยนแนวปฏิบัติที่ดี"
+        ]
+      },
+      "OPD2": {
+        happy: "84.29%",
+        engagement: "77.62%",
+        job: "78.80%",
+        alerts: [
+          "คะแนนค่าตอบแทนและสวัสดิการ 83.40% สนับสนุนการรักษากำลังคน",
+          "ควรต่อยอดโครงการพัฒนาผู้นำสายงานเพื่อรักษาคะแนนสูงต่อเนื่อง"
+        ]
+      },
+      "CSSD": {
+        happy: "81.25%",
+        engagement: "70.65%",
+        job: "83.20%",
+        alerts: [
+          "การบังคับบัญชาสูงถึง 85.60% เป็นตัวอย่างการจัดการทีม",
+          "ควรลงทุนต่อเนื่องในเทคโนโลยีสนับสนุนเพื่อลดภาระงานซ้ำ"
+        ]
+      },
+      "PICU": {
+        happy: "48.89%",
+        engagement: "62.72%",
+        job: "81.00%",
+        alerts: [
+          "มิติ Relax เพียง 52.89% และ Happy Plus 48.15% ต้องเร่งเสริมกำลังใจ",
+          "แม้สิ่งแวดล้อมการทำงานสูง (92.80%) แต่ต้องเติมทรัพยากรบุคลากรและวันพัก"
+        ]
+      },
+      "20B": {
+        happy: "57.00%",
+        engagement: "59.56%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "คะแนน Body 62.40% และ Relax 48.80% สะท้อนความเหนื่อยล้า",
+          "แนะนำจัดโครงการ Care for Caregivers และกำหนดผู้ช่วยสนับสนุน"
+        ]
+      },
+      "ER": {
+        happy: "68.48%",
+        engagement: "66.94%",
+        job: "74.00%",
+        alerts: [
+          "ค่าตอบแทนและสวัสดิการ 68.20% (ปานกลาง) ต้องเร่งทบทวน",
+          "ภาระงานสูงสะท้อนใน Relax 58.42% ต้องเพิ่มเวลาพักและทีมสนับสนุน"
+        ]
+      },
+      "ไตเทียม": {
+        happy: "68.67%",
+        engagement: "66.52%",
+        job: "74.80%",
+        alerts: [
+          "การบังคับบัญชา 68.80% และค่าตอบแทน 66.80% อยู่ระดับปานกลาง",
+          "ควรสื่อสารเส้นทางความก้าวหน้าและสวัสดิการเฉพาะทางเพิ่ม"
+        ]
+      },
+      "SICU": {
+        happy: "65.00%",
+        engagement: "64.96%",
+        job: "72.40%",
+        alerts: [
+          "ลักษณะงาน 67.80% (ปานกลาง) ต้องปรับสัดส่วนเวร",
+          "มิติ Relax 56.92% ควรเสริมทีมสนับสนุนด้านจิตใจ"
+        ]
+      }
+    };
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const panels = document.querySelectorAll('.panel');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.target;
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    const unitSelect = document.getElementById('unitSelect');
+    const happyScore = document.getElementById('happyScore');
+    const engagementScore = document.getElementById('engagementScore');
+    const jobScore = document.getElementById('jobScore');
+    const alertList = document.getElementById('alertList');
+
+    function updateUnitDetails(unit) {
+      const data = unitsData[unit];
+      happyScore.textContent = data.happy;
+      engagementScore.textContent = data.engagement;
+      jobScore.textContent = data.job;
+      alertList.innerHTML = '';
+      data.alerts.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'alert-item';
+        div.textContent = item;
+        alertList.appendChild(div);
+      });
+    }
+
+    unitSelect.addEventListener('change', (event) => {
+      updateUnitDetails(event.target.value);
+    });
+
+    updateUnitDetails(unitSelect.value);
+  </script>
+</body>
+</html>
