@@ -331,6 +331,126 @@
       cursor: default;
     }
 
+    .cluster-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .cluster-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      padding: 20px 22px;
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      box-shadow: 0 10px 26px rgba(31, 42, 68, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .cluster-card.positive {
+      background: rgba(43, 177, 168, 0.16);
+      border-color: rgba(43, 177, 168, 0.4);
+    }
+
+    .cluster-card.neutral {
+      background: rgba(255, 205, 75, 0.16);
+      border-color: rgba(255, 205, 75, 0.4);
+    }
+
+    .cluster-card.warning {
+      background: rgba(255, 138, 91, 0.16);
+      border-color: rgba(255, 138, 91, 0.42);
+    }
+
+    .cluster-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .cluster-id {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .cluster-header h4 {
+      margin: 4px 0 0;
+      font-size: 1.15rem;
+      color: var(--primary);
+    }
+
+    .cluster-score {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+
+    .cluster-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .cluster-members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cluster-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--primary);
+      font-size: 0.82rem;
+      box-shadow: 0 6px 14px rgba(31, 42, 68, 0.08);
+    }
+
+    .cluster-metrics {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .cluster-subtitle {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .cluster-tag {
+      margin-top: 6px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+      font-size: 0.82rem;
+      display: inline-block;
+    }
+
+    .cluster-tag.warning {
+      background: rgba(255, 138, 91, 0.18);
+      color: #a44a2d;
+    }
+
+    .cluster-summary {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
     .unit-select {
       width: 100%;
       padding: 12px;
@@ -543,6 +663,15 @@
             <span>ดัชนี &lt; 60%</span>
           </div>
         </div>
+      </div>
+
+      <div class="card">
+        <h3>การจัดกลุ่มหน่วยงานตามโปรไฟล์ความสุข (Cluster Analysis)</h3>
+        <p class="hint">
+          วิเคราะห์คะแนน 11 มิติความสุขเพื่อค้นหาหน่วยงานที่มีรูปแบบคล้ายกัน ช่วยให้เลือกกลยุทธ์สนับสนุนที่ตรงจุดและขยายผลจากทีมต้นแบบได้รวดเร็ว
+        </p>
+        <div class="cluster-summary" id="clusterSummary"></div>
+        <div class="cluster-grid" id="clusterGrid"></div>
       </div>
 
       <div class="card">
@@ -798,6 +927,441 @@
   </main>
 
   <script>
+    const happinessProfiles = [
+      {
+        unit: 'หอพัก',
+        dimensions: {
+          Body: 88,
+          Brain: 85,
+          Heart: 90,
+          Soul: 87,
+          Family: 89,
+          Support: 88,
+          Finance: 82,
+          Growth: 81,
+          Environment: 90,
+          Relax: 86,
+          HappyPlus: 90
+        }
+      },
+      {
+        unit: 'OPD2',
+        dimensions: {
+          Body: 84,
+          Brain: 82,
+          Heart: 86,
+          Soul: 83,
+          Family: 85,
+          Support: 84,
+          Finance: 83,
+          Growth: 80,
+          Environment: 85,
+          Relax: 78,
+          HappyPlus: 85
+        }
+      },
+      {
+        unit: 'CSSD',
+        dimensions: {
+          Body: 82,
+          Brain: 80,
+          Heart: 84,
+          Soul: 81,
+          Family: 83,
+          Support: 86,
+          Finance: 82,
+          Growth: 78,
+          Environment: 84,
+          Relax: 76,
+          HappyPlus: 82
+        }
+      },
+      {
+        unit: 'OPD3',
+        dimensions: {
+          Body: 78,
+          Brain: 77,
+          Heart: 80,
+          Soul: 78,
+          Family: 79,
+          Support: 80,
+          Finance: 79,
+          Growth: 76,
+          Environment: 82,
+          Relax: 74,
+          HappyPlus: 79
+        }
+      },
+      {
+        unit: 'ปฐมภูมิ',
+        dimensions: {
+          Body: 81,
+          Brain: 79,
+          Heart: 83,
+          Soul: 80,
+          Family: 82,
+          Support: 82,
+          Finance: 78,
+          Growth: 82,
+          Environment: 83,
+          Relax: 75,
+          HappyPlus: 84
+        }
+      },
+      {
+        unit: 'ผู้บริหาร',
+        dimensions: {
+          Body: 76,
+          Brain: 78,
+          Heart: 82,
+          Soul: 79,
+          Family: 80,
+          Support: 83,
+          Finance: 77,
+          Growth: 81,
+          Environment: 80,
+          Relax: 72,
+          HappyPlus: 80
+        }
+      },
+      {
+        unit: 'งานระบาด',
+        dimensions: {
+          Body: 85,
+          Brain: 88,
+          Heart: 87,
+          Soul: 86,
+          Family: 84,
+          Support: 86,
+          Finance: 82,
+          Growth: 84,
+          Environment: 88,
+          Relax: 80,
+          HappyPlus: 88
+        }
+      },
+      {
+        unit: 'PICU',
+        dimensions: {
+          Body: 66,
+          Brain: 72,
+          Heart: 70,
+          Soul: 68,
+          Family: 65,
+          Support: 75,
+          Finance: 74,
+          Growth: 69,
+          Environment: 93,
+          Relax: 53,
+          HappyPlus: 48
+        }
+      },
+      {
+        unit: '20B',
+        dimensions: {
+          Body: 62,
+          Brain: 68,
+          Heart: 66,
+          Soul: 64,
+          Family: 63,
+          Support: 70,
+          Finance: 69,
+          Growth: 66,
+          Environment: 72,
+          Relax: 49,
+          HappyPlus: 55
+        }
+      },
+      {
+        unit: '19C',
+        dimensions: {
+          Body: 64,
+          Brain: 69,
+          Heart: 67,
+          Soul: 65,
+          Family: 64,
+          Support: 71,
+          Finance: 68,
+          Growth: 65,
+          Environment: 74,
+          Relax: 51,
+          HappyPlus: 57
+        }
+      },
+      {
+        unit: '22A & Stroke',
+        dimensions: {
+          Body: 66,
+          Brain: 70,
+          Heart: 68,
+          Soul: 66,
+          Family: 65,
+          Support: 72,
+          Finance: 67,
+          Growth: 68,
+          Environment: 76,
+          Relax: 55,
+          HappyPlus: 56
+        }
+      },
+      {
+        unit: 'ER',
+        dimensions: {
+          Body: 64,
+          Brain: 71,
+          Heart: 69,
+          Soul: 66,
+          Family: 68,
+          Support: 73,
+          Finance: 68,
+          Growth: 67,
+          Environment: 75,
+          Relax: 58,
+          HappyPlus: 60
+        }
+      },
+      {
+        unit: 'SICU',
+        dimensions: {
+          Body: 63,
+          Brain: 70,
+          Heart: 68,
+          Soul: 65,
+          Family: 64,
+          Support: 72,
+          Finance: 66,
+          Growth: 67,
+          Environment: 74,
+          Relax: 57,
+          HappyPlus: 59
+        }
+      },
+      {
+        unit: 'ไตเทียม',
+        dimensions: {
+          Body: 70,
+          Brain: 72,
+          Heart: 73,
+          Soul: 71,
+          Family: 70,
+          Support: 68,
+          Finance: 67,
+          Growth: 69,
+          Environment: 78,
+          Relax: 60,
+          HappyPlus: 62
+        }
+      }
+    ];
+
+    const dimensionLabels = {
+      Body: 'Body (สุขภาพกาย)',
+      Brain: 'Brain (การเรียนรู้)',
+      Heart: 'Heart (ความสัมพันธ์)',
+      Soul: 'Soul (คุณค่าภายใน)',
+      Family: 'Family (เครือข่ายหนุนเสริม)',
+      Support: 'การนำและระบบสนับสนุน',
+      Finance: 'ค่าตอบแทนและสวัสดิการ',
+      Growth: 'โอกาสเติบโตในงาน',
+      Environment: 'สิ่งแวดล้อมการทำงาน',
+      Relax: 'Relax (Work-Life Balance)',
+      HappyPlus: 'Happy Plus (ความสุขเชิงบวก)'
+    };
+
+    const dimensionKeys = Object.keys(happinessProfiles[0].dimensions);
+
+    const clusterSummaryElement = document.getElementById('clusterSummary');
+    const clusterGridElement = document.getElementById('clusterGrid');
+
+    if (clusterSummaryElement && clusterGridElement) {
+      const seeds = ['หอพัก', 'ER', 'PICU'];
+      const clusterResult = analyzeHappinessClusters(happinessProfiles, dimensionKeys, seeds);
+      clusterSummaryElement.textContent = clusterResult.summary;
+      renderClusterCards(clusterGridElement, clusterResult.details);
+    }
+
+    function analyzeHappinessClusters(profiles, keys, seeds) {
+      const k = 3;
+      const { clusters } = kMeansProfiles(profiles, keys, k, seeds);
+      const populatedClusters = clusters.filter(cluster => cluster.length);
+
+      const details = populatedClusters.map((members, index) => {
+        const averages = keys.reduce((acc, key) => {
+          const total = members.reduce((sum, profile) => sum + profile.dimensions[key], 0);
+          acc[key] = total / members.length;
+          return acc;
+        }, {});
+
+        const overall = keys.reduce((sum, key) => sum + averages[key], 0) / keys.length;
+        const classification = classifyCluster(overall, averages);
+
+        const strengths = keys
+          .slice()
+          .sort((a, b) => averages[b] - averages[a])
+          .slice(0, 2)
+          .map(key => `${dimensionLabels[key]} ${formatPercentage(averages[key])}`);
+
+        const watch = keys
+          .slice()
+          .sort((a, b) => averages[a] - averages[b])
+          .slice(0, 2)
+          .map(key => `${dimensionLabels[key]} ${formatPercentage(averages[key])}`);
+
+        return {
+          id: index + 1,
+          members: members.map(member => member.unit),
+          overall: formatPercentage(overall),
+          classification,
+          strengths,
+          watch
+        };
+      });
+
+      const summaryParts = details.map(detail => `${detail.classification.label} (${detail.members.length} หน่วย, เฉลี่ย ${detail.overall})`);
+      const summaryText = `วิเคราะห์โปรไฟล์ความสุขของ ${profiles.length} หน่วยงาน พบ ${details.length} คลัสเตอร์หลัก: ${summaryParts.join(' • ')}.`;
+
+      return {
+        summary: summaryText,
+        details
+      };
+    }
+
+    function kMeansProfiles(profiles, keys, k, seeds, maxIterations = 30) {
+      const fallbackProfiles = profiles.filter(profile => !seeds.includes(profile.unit));
+      const seedCentroids = seeds
+        .map(seed => profiles.find(profile => profile.unit === seed))
+        .filter(Boolean)
+        .map(profile => keys.map(key => profile.dimensions[key]));
+
+      let centroids = seedCentroids.slice(0, k);
+      let fallbackIndex = 0;
+      while (centroids.length < k && fallbackIndex < fallbackProfiles.length) {
+        centroids.push(keys.map(key => fallbackProfiles[fallbackIndex].dimensions[key]));
+        fallbackIndex += 1;
+      }
+
+      if (!centroids.length) {
+        centroids = profiles.slice(0, k).map(profile => keys.map(key => profile.dimensions[key]));
+      }
+
+      let clusters = [];
+
+      for (let iteration = 0; iteration < maxIterations; iteration += 1) {
+        clusters = Array.from({ length: centroids.length }, () => []);
+
+        profiles.forEach(profile => {
+          const vector = keys.map(key => profile.dimensions[key]);
+          let bestIndex = 0;
+          let bestDistance = Infinity;
+
+          centroids.forEach((centroid, index) => {
+            const distance = euclideanDistance(vector, centroid);
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestIndex = index;
+            }
+          });
+
+          clusters[bestIndex].push(profile);
+        });
+
+        const newCentroids = centroids.map((centroid, index) => {
+          const members = clusters[index];
+          if (!members.length) {
+            return centroid;
+          }
+          const sums = new Array(keys.length).fill(0);
+          members.forEach(member => {
+            keys.forEach((key, keyIndex) => {
+              sums[keyIndex] += member.dimensions[key];
+            });
+          });
+          return sums.map(sum => sum / members.length);
+        });
+
+        const hasShift = centroids.some((centroid, index) =>
+          centroid.some((value, dimIndex) => Math.abs(value - newCentroids[index][dimIndex]) > 0.1)
+        );
+
+        centroids = newCentroids;
+
+        if (!hasShift) {
+          break;
+        }
+      }
+
+      clusters = clusters.filter(cluster => cluster.length);
+
+      return { clusters, centroids };
+    }
+
+    function euclideanDistance(a, b) {
+      return Math.sqrt(a.reduce((sum, value, index) => sum + Math.pow(value - b[index], 2), 0));
+    }
+
+    function classifyCluster(overall, averages) {
+      if (overall >= 80 && averages.Relax >= 75 && averages.HappyPlus >= 80) {
+        return {
+          label: 'สมดุลสูงเป็นต้นแบบ',
+          description:
+            'คะแนนทุกมิติเฉลี่ยมากกว่า 80% โดยเฉพาะการผ่อนคลายและความสุขเชิงบวก เหมาะขยายผลเป็นทีมต้นแบบและโค้ชหน่วยอื่น',
+          tone: 'positive'
+        };
+      }
+
+      if (averages.Relax < 60 || averages.Body < 65) {
+        return {
+          label: 'ภาระงานตึง ต้องเร่งพยุง',
+          description:
+            'คะแนนด้านพลังงานกายและเวลาพักต่ำกว่ามาตรฐาน สะท้อนความล้าและความเสี่ยงผูกพัน จำเป็นต้องจัดการเวรและเพิ่มระบบสนับสนุนทันที',
+          tone: 'warning'
+        };
+      }
+
+      return {
+        label: 'กลุ่มกำลังเสริมสมดุล',
+        description:
+          'คะแนนรวมระดับกลาง แข็งแรงด้านการสนับสนุนและสิ่งแวดล้อม แต่ยังต้องต่อยอดมิติความผ่อนคลายและแรงจูงใจเชิงบวก',
+        tone: 'neutral'
+      };
+    }
+
+    function formatPercentage(value) {
+      return `${Math.round(value)}%`;
+    }
+
+    function renderClusterCards(container, details) {
+      container.innerHTML = '';
+      details.forEach(detail => {
+        const card = document.createElement('div');
+        card.className = `cluster-card ${detail.classification.tone}`;
+        card.innerHTML = `
+          <div class="cluster-header">
+            <div>
+              <span class="cluster-id">Cluster ${detail.id}</span>
+              <h4>${detail.classification.label}</h4>
+            </div>
+            <span class="cluster-score">เฉลี่ย ${detail.overall}</span>
+          </div>
+          <p class="cluster-desc">${detail.classification.description}</p>
+          <div class="cluster-members">
+            ${detail.members.map(member => `<span class="cluster-chip">${member}</span>`).join('')}
+          </div>
+          <div class="cluster-metrics">
+            <div>
+              <span class="cluster-subtitle">จุดแข็ง</span>
+              ${detail.strengths.map(text => `<div class="cluster-tag">${text}</div>`).join('')}
+            </div>
+            <div>
+              <span class="cluster-subtitle">เฝ้าระวัง</span>
+              ${detail.watch.map(text => `<div class="cluster-tag warning">${text}</div>`).join('')}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
     const unitsData = {
       "หอพัก": {
         happy: "90.0%",
