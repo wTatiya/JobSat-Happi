@@ -987,6 +987,44 @@
       </div>
 
       <div class="card">
+        <h3>Comparative Analysis: High vs. Low Performing Units</h3>
+        <p class="hint">เปรียบเทียบ Top 5 และ Bottom 5 หน่วยงานจากคะแนนความผูกพัน ความพึงพอใจ และความสุขรวม เพื่อระบุช่องว่างของประสบการณ์พนักงาน</p>
+        <div class="metric" id="topBottomSummary" style="background: rgba(43, 177, 168, 0.12);"></div>
+        <div class="insight-grid">
+          <div class="metric" id="commitmentComparative"></div>
+          <div class="metric" id="satisfactionComparative"></div>
+          <div class="metric" id="happinessComparative"></div>
+        </div>
+        <div class="alert-list" id="topBottomHighlights"></div>
+      </div>
+
+      <div class="card">
+        <h3>Satisfaction vs. Resignation Rate</h3>
+        <p class="hint">วิเคราะห์ว่าหน่วยที่มีคะแนนความพึงพอใจต่ำกว่า 70% มีแนวโน้มลาออกสูงกว่าหรือไม่ โดยใช้ข้อมูล 7 หน่วยที่มีสถิติลาออกชัดเจน</p>
+        <div class="metric" id="satisfactionResignationSummary" style="background: rgba(255, 205, 75, 0.16);"></div>
+        <div class="table-wrapper">
+          <table class="commitment-table">
+            <thead>
+              <tr>
+                <th>หน่วยงาน</th>
+                <th>ความพึงพอใจ</th>
+                <th>จำนวนลาออก</th>
+              </tr>
+            </thead>
+            <tbody id="satisfactionResignationTable"></tbody>
+          </table>
+        </div>
+        <div class="alert-list" id="satisfactionResignationInsights"></div>
+      </div>
+
+      <div class="card">
+        <h3>Commitment vs. Happiness Correlation</h3>
+        <p class="hint">เชื่อมโยงข้อมูล 13 หน่วยงานที่มีข้อมูลครบทั้งสามมิติ เพื่อตอบว่าเมื่อความสุขสูงขึ้น คะแนนความผูกพันสูงขึ้นด้วยหรือไม่</p>
+        <div class="metric" id="commitmentHappinessSummary" style="background: rgba(44, 61, 122, 0.08);"></div>
+        <div class="alert-list" id="commitmentHappinessInsights"></div>
+      </div>
+
+      <div class="card">
         <h3>Trend Simulation 2569</h3>
         <p class="hint">แบบจำลองคาดการณ์ลาออกในอีก 6-12 เดือน โดยอ้างอิงจำนวนลาออกปัจจุบัน คะแนนความผูกพัน และตัวชี้วัดความพึงพอใจ</p>
         <div class="forecast-grid" id="forecastGrid"></div>
@@ -1457,6 +1495,69 @@
       return `${Math.round(value)}%`;
     }
 
+    function parsePercentageValue(value) {
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (value === null || value === undefined) {
+        return null;
+      }
+      const normalized = value.toString().replace(',', '.');
+      const match = normalized.match(/-?\d+(?:\.\d+)?/);
+      return match ? parseFloat(match[0]) : null;
+    }
+
+    function calculateAverage(items, key) {
+      if (!items.length) {
+        return 0;
+      }
+      const total = items.reduce((sum, item) => sum + (key ? item[key] : item), 0);
+      return total / items.length;
+    }
+
+    function calculatePearson(data, xKey, yKey) {
+      const n = data.length;
+      if (n < 2) {
+        return 0;
+      }
+      let sumX = 0;
+      let sumY = 0;
+      let sumXY = 0;
+      let sumX2 = 0;
+      let sumY2 = 0;
+
+      data.forEach(item => {
+        const x = item[xKey];
+        const y = item[yKey];
+        sumX += x;
+        sumY += y;
+        sumXY += x * y;
+        sumX2 += x * x;
+        sumY2 += y * y;
+      });
+
+      const numerator = n * sumXY - sumX * sumY;
+      const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+      if (!denominator) {
+        return 0;
+      }
+      return numerator / denominator;
+    }
+
+    function buildTopBottomComparison(units, metricKey, groupSize = 5) {
+      const validUnits = units.filter(item => Number.isFinite(item[metricKey]));
+      if (!validUnits.length) {
+        return null;
+      }
+      const sorted = validUnits.slice().sort((a, b) => b[metricKey] - a[metricKey]);
+      const size = Math.min(groupSize, sorted.length);
+      const topGroup = sorted.slice(0, size);
+      const bottomGroup = sorted.slice(-size).reverse();
+      const topAvg = calculateAverage(topGroup, metricKey);
+      const bottomAvg = calculateAverage(bottomGroup, metricKey);
+      return { size, topGroup, bottomGroup, topAvg, bottomAvg, diff: topAvg - bottomAvg };
+    }
+
     function renderClusterCards(container, details) {
       container.innerHTML = '';
       details.forEach(detail => {
@@ -1661,6 +1762,274 @@
       { unit: '18D', current: 2, commitment: 72, engagement: 74, happiness: 71, workloadPressure: 0.48, mitigation: 0.25 },
       { unit: '23A', current: 2, commitment: 74, engagement: 75, happiness: 73, workloadPressure: 0.45, mitigation: 0.28 }
     ];
+
+    let comparativeUnits = [];
+    let comparisonResults = null;
+
+    const topBottomSummaryElement = document.getElementById('topBottomSummary');
+    const commitmentComparativeElement = document.getElementById('commitmentComparative');
+    const satisfactionComparativeElement = document.getElementById('satisfactionComparative');
+    const happinessComparativeElement = document.getElementById('happinessComparative');
+    const topBottomHighlightsElement = document.getElementById('topBottomHighlights');
+    const satisfactionResignationSummaryElement = document.getElementById('satisfactionResignationSummary');
+    const satisfactionResignationTable = document.getElementById('satisfactionResignationTable');
+    const satisfactionResignationInsightsElement = document.getElementById('satisfactionResignationInsights');
+    const commitmentHappinessSummaryElement = document.getElementById('commitmentHappinessSummary');
+    const commitmentHappinessInsightsElement = document.getElementById('commitmentHappinessInsights');
+
+    if (
+      topBottomSummaryElement &&
+      commitmentComparativeElement &&
+      satisfactionComparativeElement &&
+      happinessComparativeElement &&
+      topBottomHighlightsElement
+    ) {
+      const comparativeMap = new Map();
+
+      resignationTrendData.forEach(item => {
+        const satisfaction = (item.commitment + item.engagement + item.happiness) / 3;
+        comparativeMap.set(item.unit, {
+          unit: item.unit,
+          commitment: item.commitment,
+          satisfaction,
+          happiness: item.happiness,
+          resignations: item.current
+        });
+      });
+
+      Object.entries(unitsData).forEach(([unit, data]) => {
+        const commitment = parsePercentageValue(data.engagement);
+        const satisfaction = parsePercentageValue(data.job);
+        const happiness = parsePercentageValue(data.happy);
+        if (commitment !== null && satisfaction !== null && happiness !== null) {
+          const existing = comparativeMap.get(unit) || { unit };
+          comparativeMap.set(unit, {
+            unit,
+            commitment: existing.commitment ?? commitment,
+            satisfaction: existing.satisfaction ?? satisfaction,
+            happiness: existing.happiness ?? happiness,
+            resignations: existing.resignations ?? null
+          });
+        }
+      });
+
+      comparativeUnits = Array.from(comparativeMap.values()).filter(
+        item =>
+          Number.isFinite(item.commitment) &&
+          Number.isFinite(item.satisfaction) &&
+          Number.isFinite(item.happiness)
+      );
+
+      const metricConfigs = [
+        { key: 'commitment', element: commitmentComparativeElement, label: 'ช่องว่างคะแนนความผูกพัน' },
+        { key: 'satisfaction', element: satisfactionComparativeElement, label: 'ช่องว่างคะแนนความพึงพอใจ' },
+        { key: 'happiness', element: happinessComparativeElement, label: 'ช่องว่างคะแนนความสุขรวม' }
+      ];
+
+      comparisonResults = {};
+
+      metricConfigs.forEach(config => {
+        const result = buildTopBottomComparison(comparativeUnits, config.key);
+        if (!result) {
+          return;
+        }
+        comparisonResults[config.key] = result;
+        const topLabel = result.topGroup
+          .map(item => `${item.unit} (${item[config.key].toFixed(1)}%)`)
+          .join(', ');
+        const bottomLabel = result.bottomGroup
+          .map(item => `${item.unit} (${item[config.key].toFixed(1)}%)`)
+          .join(', ');
+        const diffLabel = result.diff >= 0 ? '+' : '';
+        config.element.innerHTML = `
+          <span class="metric-title">${config.label}</span>
+          <span class="metric-value">${diffLabel}${result.diff.toFixed(1)} จุด</span>
+          <p class="metric-desc">Top ${result.size}: ${topLabel}<br>Bottom ${result.size}: ${bottomLabel}</p>
+        `;
+      });
+
+      const validComparisons = metricConfigs
+        .map(config => comparisonResults[config.key])
+        .filter(Boolean);
+
+      if (validComparisons.length) {
+        const topAverage = calculateAverage(validComparisons.map(result => result.topAvg));
+        const bottomAverage = calculateAverage(validComparisons.map(result => result.bottomAvg));
+        const gap = topAverage - bottomAverage;
+        const gapLabel = gap >= 0 ? '+' : '';
+        topBottomSummaryElement.innerHTML = `
+          <span class="metric-title">${comparativeUnits.length} หน่วยพร้อมข้อมูลครบ</span>
+          <span class="metric-value">${gapLabel}${gap.toFixed(1)} จุด</span>
+          <p class="metric-desc">คะแนนเฉลี่ยสามมิติเชิงประสบการณ์ของ Top 5 อยู่ที่ ${topAverage.toFixed(1)}% สูงกว่า Bottom 5 ที่ ${bottomAverage.toFixed(1)}%</p>
+        `;
+      }
+
+      const highlightMessages = [];
+      const commitmentResult = comparisonResults?.commitment;
+      const satisfactionResult = comparisonResults?.satisfaction;
+      const happinessResult = comparisonResults?.happiness;
+
+      if (commitmentResult) {
+        const topLeader = commitmentResult.topGroup[0];
+        const bottomLeader = commitmentResult.bottomGroup[0];
+        highlightMessages.push(
+          `ความผูกพันของกลุ่มนำสูงกว่า ${commitmentResult.diff.toFixed(1)} จุด นำโดย ${topLeader.unit} (${topLeader.commitment.toFixed(1)}%) เทียบกับ ${bottomLeader.unit} (${bottomLeader.commitment.toFixed(1)}%)`
+        );
+      }
+
+      if (satisfactionResult) {
+        const lowShareUnits = satisfactionResult.bottomGroup.slice(0, 2).map(item => item.unit).join(', ');
+        highlightMessages.push(
+          `หน่วยที่ความพึงพอใจต่ำสุด ได้แก่ ${lowShareUnits} ซึ่งเฉลี่ยแล้วอยู่ต่ำกว่า Top Group ${satisfactionResult.diff.toFixed(1)} จุด`
+        );
+      }
+
+      if (happinessResult) {
+        const highCommitmentHappy = happinessResult.topGroup.filter(item => item.commitment >= 70);
+        if (highCommitmentHappy.length) {
+          highlightMessages.push(
+            `หน่วยที่รักษาความสุขและความผูกพัน ≥70% พร้อมกัน ได้แก่ ${highCommitmentHappy
+              .map(item => item.unit)
+              .join(', ')}`
+          );
+        } else {
+          highlightMessages.push(
+            `กลุ่มความสุขสูงมีความผูกพันเฉลี่ย ${happinessResult.topAvg.toFixed(1)}% สูงกว่ากลุ่มต่ำ ${happinessResult.bottomAvg.toFixed(1)}%`
+          );
+        }
+      }
+
+      topBottomHighlightsElement.innerHTML = '';
+      highlightMessages.forEach(message => {
+        const item = document.createElement('div');
+        item.className = 'alert-item';
+        item.textContent = message;
+        topBottomHighlightsElement.appendChild(item);
+      });
+    }
+
+    if (
+      satisfactionResignationSummaryElement &&
+      satisfactionResignationTable &&
+      satisfactionResignationInsightsElement
+    ) {
+      const satisfactionResignData = resignationTrendData.map(item => ({
+        unit: item.unit,
+        satisfaction: (item.commitment + item.engagement + item.happiness) / 3,
+        resignations: item.current
+      }));
+
+      const satisfactionCorrelation = calculatePearson(satisfactionResignData, 'satisfaction', 'resignations');
+      const threshold = 70;
+      const lowGroup = satisfactionResignData.filter(item => item.satisfaction < threshold);
+      const highGroup = satisfactionResignData.filter(item => item.satisfaction >= threshold);
+      const lowAverage = calculateAverage(lowGroup, 'resignations');
+      const highAverage = calculateAverage(highGroup, 'resignations');
+      const totalResignCount = satisfactionResignData.reduce((sum, item) => sum + item.resignations, 0);
+      const lowResignCount = lowGroup.reduce((sum, item) => sum + item.resignations, 0);
+      const highResignCount = highGroup.reduce((sum, item) => sum + item.resignations, 0);
+      const lowShare = totalResignCount ? (lowResignCount / totalResignCount) * 100 : 0;
+      const highShare = totalResignCount ? (highResignCount / totalResignCount) * 100 : 0;
+
+      const correlationLabel = satisfactionCorrelation >= 0 ? '+' : '';
+      satisfactionResignationSummaryElement.innerHTML = `
+        <span class="metric-title">สหสัมพันธ์ (r)</span>
+        <span class="metric-value">${correlationLabel}${satisfactionCorrelation.toFixed(2)}</span>
+        <p class="metric-desc">กลุ่มคะแนนความพึงพอใจต่ำกว่า ${threshold}% มีลาออกเฉลี่ย ${lowAverage.toFixed(1)} คน/หน่วย (${lowShare.toFixed(1)}% ของทั้งหมด) เทียบกับ ${highAverage.toFixed(1)} คน/หน่วย ในกลุ่มคะแนนสูง (${highShare.toFixed(1)}%)</p>
+      `;
+
+      satisfactionResignationTable.innerHTML = '';
+      satisfactionResignData
+        .slice()
+        .sort((a, b) => a.satisfaction - b.satisfaction)
+        .forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><strong>${item.unit}</strong></td>
+            <td>${item.satisfaction.toFixed(1)}%</td>
+            <td>${item.resignations} คน</td>
+          `;
+          satisfactionResignationTable.appendChild(row);
+        });
+
+      const lowLeaders = lowGroup.map(item => `${item.unit} (${item.resignations} คน)`).join(', ');
+      const highStable = highGroup.map(item => `${item.unit} (${item.resignations} คน)`).join(', ');
+
+      const insightMessages = [];
+      if (lowGroup.length) {
+        insightMessages.push(
+          `คะแนนความพึงพอใจต่ำกว่า ${threshold}% เช่น ${lowLeaders} คิดเป็น ${lowShare.toFixed(1)}% ของการลาออกทั้งหมด`
+        );
+      }
+      if (highGroup.length) {
+        insightMessages.push(
+          `กลุ่มที่รักษาความพึงพอใจ ≥${threshold}% (${highStable}) มีลาออกเฉลี่ยต่ำกว่า ${highAverage.toFixed(1)} คน/หน่วย`
+        );
+      }
+      insightMessages.push('ค่าสหสัมพันธ์เป็นบวกอ่อน แสดงว่าความพึงพอใจที่ลดลงยังคงสัมพันธ์กับการสูญเสียกำลังคน แม้จะมีปัจจัยอื่นร่วมด้วย');
+
+      satisfactionResignationInsightsElement.innerHTML = '';
+      insightMessages.forEach(message => {
+        const item = document.createElement('div');
+        item.className = 'alert-item';
+        item.textContent = message;
+        satisfactionResignationInsightsElement.appendChild(item);
+      });
+    }
+
+    if (commitmentHappinessSummaryElement && commitmentHappinessInsightsElement) {
+      const dataForCorrelation = comparativeUnits.length ? comparativeUnits : resignationTrendData.map(item => ({
+        unit: item.unit,
+        commitment: item.commitment,
+        happiness: item.happiness
+      }));
+
+      const correlation = calculatePearson(dataForCorrelation, 'happiness', 'commitment');
+      const correlationLabel = correlation >= 0 ? '+' : '';
+      const happinessComparison = comparisonResults?.happiness || buildTopBottomComparison(dataForCorrelation, 'happiness');
+      const topCommitmentAverage = happinessComparison ? calculateAverage(happinessComparison.topGroup, 'commitment') : 0;
+      const bottomCommitmentAverage = happinessComparison ? calculateAverage(happinessComparison.bottomGroup, 'commitment') : 0;
+      const commitmentGap = topCommitmentAverage - bottomCommitmentAverage;
+      const gapLabel = commitmentGap >= 0 ? '+' : '';
+
+      commitmentHappinessSummaryElement.innerHTML = `
+        <span class="metric-title">สหสัมพันธ์ (r)</span>
+        <span class="metric-value">${correlationLabel}${correlation.toFixed(2)}</span>
+        <p class="metric-desc">กลุ่มที่มีความสุขสูงสุดรักษาคะแนนผูกพันเฉลี่ย ${topCommitmentAverage.toFixed(1)}% สูงกว่ากลุ่มต่ำสุด ${gapLabel}${Math.abs(commitmentGap).toFixed(1)} จุด</p>
+      `;
+
+      const alignedUnits = dataForCorrelation.filter(item => item.commitment >= 70 && item.happiness >= 70);
+      const riskUnits = dataForCorrelation.filter(item => item.commitment < 65 && item.happiness < 65);
+      const mismatchUnits = dataForCorrelation.filter(
+        item => (item.happiness >= 70 && item.commitment < 65) || (item.happiness < 65 && item.commitment >= 70)
+      );
+
+      const correlationInsights = [];
+      if (alignedUnits.length) {
+        correlationInsights.push(
+          `High-High Cluster: ${alignedUnits.map(item => `${item.unit} (${item.happiness.toFixed(1)}% / ${item.commitment.toFixed(1)}%)`).join(', ')}`
+        );
+      }
+      if (riskUnits.length) {
+        correlationInsights.push(
+          `Low-Low Cluster: ${riskUnits.map(item => `${item.unit} (${item.happiness.toFixed(1)}% / ${item.commitment.toFixed(1)}%)`).join(', ')} ต้องการแผนฟื้นฟูเร่งด่วน`
+        );
+      }
+      if (mismatchUnits.length) {
+        correlationInsights.push(
+          `Mismatch ที่ควรเจาะลึก: ${mismatchUnits.map(item => `${item.unit} (${item.happiness.toFixed(1)}% / ${item.commitment.toFixed(1)}%)`).join(', ')}`
+        );
+      }
+      correlationInsights.push('แนวโน้มบวกระดับกลางชี้ว่าการยกระดับประสบการณ์เชิงบวกยังช่วยเสริมความผูกพันได้ แม้ต้องบริหารปัจจัยอื่นประกอบ');
+
+      commitmentHappinessInsightsElement.innerHTML = '';
+      correlationInsights.forEach(message => {
+        const item = document.createElement('div');
+        item.className = 'alert-item';
+        item.textContent = message;
+        commitmentHappinessInsightsElement.appendChild(item);
+      });
+    }
 
     const forecastGrid = document.getElementById('forecastGrid');
     const forecastInsights = document.getElementById('forecastInsights');
