@@ -524,6 +524,131 @@
       margin-bottom: 12px;
     }
 
+    .persona-summary {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .persona-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .persona-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 18px;
+      padding: 20px 22px;
+      border: 1px solid rgba(44, 61, 122, 0.12);
+      box-shadow: 0 10px 24px rgba(31, 42, 68, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .persona-card.positive {
+      background: rgba(43, 177, 168, 0.18);
+      border-color: rgba(43, 177, 168, 0.45);
+      box-shadow: 0 12px 28px rgba(43, 177, 168, 0.18);
+    }
+
+    .persona-card.neutral {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(44, 61, 122, 0.12);
+    }
+
+    .persona-card.warning {
+      background: rgba(255, 205, 75, 0.2);
+      border-color: rgba(255, 205, 75, 0.45);
+    }
+
+    .persona-card.critical {
+      background: rgba(255, 138, 91, 0.18);
+      border-color: rgba(255, 138, 91, 0.45);
+      box-shadow: 0 12px 30px rgba(255, 138, 91, 0.2);
+    }
+
+    .persona-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .persona-tag {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .persona-score {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: rgba(44, 61, 122, 0.1);
+      border-radius: 999px;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+
+    .persona-card.positive .persona-score {
+      background: rgba(255, 255, 255, 0.4);
+      color: #11655f;
+    }
+
+    .persona-card.warning .persona-score,
+    .persona-card.critical .persona-score {
+      background: rgba(255, 255, 255, 0.5);
+      color: #a44a2d;
+    }
+
+    .persona-desc {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .persona-focus {
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    .persona-members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .persona-chip {
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+      font-size: 0.8rem;
+      box-shadow: 0 6px 16px rgba(31, 42, 68, 0.08);
+    }
+
+    .persona-card.positive .persona-chip {
+      background: rgba(255, 255, 255, 0.7);
+      color: #11655f;
+    }
+
+    .persona-card.warning .persona-chip,
+    .persona-card.critical .persona-chip {
+      background: rgba(255, 255, 255, 0.75);
+      color: #a44a2d;
+    }
+
     .unit-select {
       width: 100%;
       padding: 12px;
@@ -846,6 +971,15 @@
         </p>
         <div class="cluster-summary" id="clusterSummary"></div>
         <div class="cluster-grid" id="clusterGrid"></div>
+      </div>
+
+      <div class="card">
+        <h3>Engagement Personas</h3>
+        <p class="hint">
+          จำแนกหน่วยงานตามระดับความสุข (Happinometer) และความผูกพัน เพื่อสกัด persona สำคัญ เช่น “Highly Happy but Lowly Committed” สำหรับวางแผนการดูแลเฉพาะกลุ่ม
+        </p>
+        <div class="persona-summary" id="personaSummary"></div>
+        <div class="persona-grid" id="personaGrid"></div>
       </div>
 
       <div class="card">
@@ -1677,6 +1811,145 @@
       });
     }
 
+    function formatPersonaMetric(value) {
+      if (!Number.isFinite(value)) {
+        return '-';
+      }
+      const rounded = Math.round(value * 10) / 10;
+      return `${rounded.toFixed(1)}%`;
+    }
+
+    function analyzeEngagementPersonas(unitMap) {
+      const units = Object.entries(unitMap)
+        .map(([unit, data]) => ({
+          unit,
+          happiness: parsePercentageValue(data.happy),
+          engagement: parsePercentageValue(data.engagement)
+        }))
+        .filter(item => Number.isFinite(item.happiness) && Number.isFinite(item.engagement));
+
+      if (!units.length) {
+        return { summary: 'ยังไม่มีข้อมูลเพียงพอสำหรับจำแนก persona', details: [] };
+      }
+
+      const personaDefinitions = [
+        {
+          id: 'thriving',
+          order: 1,
+          tone: 'positive',
+          label: 'Thriving Champions',
+          description:
+            'ความสุขและความผูกพันสูงกว่ามาตรฐาน เป็นทีมต้นแบบที่พร้อมแบ่งปันแนวทางสร้างประสบการณ์เชิงบวก',
+          focus: 'ต่อยอดบทบาทเป็นพี่เลี้ยงและโค้ช เพื่อยกระดับหน่วยที่ยังตามหลัง',
+          condition: (h, e) => h >= 78 && e >= 72
+        },
+        {
+          id: 'happyLowCommit',
+          order: 2,
+          tone: 'warning',
+          label: 'Highly Happy but Lowly Committed',
+          description:
+            'ความสุขในงานสูงแต่ความผูกพันยังไม่มั่นคง บ่งชี้ความเสี่ยงต่อการย้ายงานหากไม่มีเส้นทางเติบโตชัดเจน',
+          focus: 'เน้นการสื่อสารวิสัยทัศน์และสร้างโอกาสเติบโต/พัฒนาเส้นทางความก้าวหน้า',
+          condition: (h, e) => h >= 75 && e < 70
+        },
+        {
+          id: 'committedStrain',
+          order: 3,
+          tone: 'neutral',
+          label: 'Committed but Under Strain',
+          description:
+            'ยึดมั่นกับงานและทีม แต่คะแนนความสุขต่ำกว่ามาตรฐาน สะท้อนภาระงานและพลังงานที่ถดถอย',
+          focus: 'ปรับตารางเวร เติมทรัพยากร และจัดโปรแกรมฟื้นฟูพลังงานป้องกันภาวะเหนื่อยล้า',
+          condition: (h, e) => h < 70 && e >= 70
+        },
+        {
+          id: 'atRisk',
+          order: 4,
+          tone: 'critical',
+          label: 'Disengaged & Vulnerable',
+          description:
+            'ทั้งความสุขและความผูกพันอยู่ในระดับต่ำ ต้องเร่งเสริมระบบสนับสนุนและบทสนทนากับผู้นำสายงาน',
+          focus: 'จัดทีมเฉพาะกิจรับฟังเสียงบุคลากร วางมาตรการเร่งด่วนเพื่อยึดเหนี่ยวคนและลดลาออก',
+          condition: (h, e) => h < 65 && e < 65
+        }
+      ];
+
+      const defaultPersona = {
+        id: 'steadyCore',
+        order: 5,
+        tone: 'neutral',
+        label: 'Balanced Core Team',
+        description:
+          'คะแนนอยู่ในระดับปานกลางทั้งสองด้าน ต้องรักษาเสถียรภาพพร้อมหา quick win เพื่อขยับสู่กลุ่มต้นแบบ',
+        focus: 'กำหนด action เล็ก ๆ เช่น โครงการยกย่องและวงแลกเปลี่ยนประสบการณ์เพื่อดันคะแนนให้สูงขึ้น'
+      };
+
+      const personaState = {};
+      [...personaDefinitions, defaultPersona].forEach(definition => {
+        personaState[definition.id] = { ...definition, members: [], happinessTotal: 0, engagementTotal: 0 };
+      });
+
+      units.forEach(unit => {
+        const matched = personaDefinitions.find(def => def.condition(unit.happiness, unit.engagement));
+        const persona = matched || defaultPersona;
+        const bucket = personaState[persona.id];
+        bucket.members.push(unit);
+        bucket.happinessTotal += unit.happiness;
+        bucket.engagementTotal += unit.engagement;
+      });
+
+      const details = Object.values(personaState)
+        .filter(detail => detail.members.length)
+        .sort((a, b) => a.order - b.order)
+        .map(detail => ({
+          id: detail.id,
+          tone: detail.tone,
+          label: detail.label,
+          description: detail.description,
+          focus: detail.focus,
+          averages: {
+            happiness: detail.happinessTotal / detail.members.length,
+            engagement: detail.engagementTotal / detail.members.length
+          },
+          members: detail.members
+        }));
+
+      const summaryParts = details.map(detail => `${detail.label} ${detail.members.length} หน่วย`).join(' • ');
+      const riskGroup = details.find(detail => detail.id === 'atRisk');
+      const totalUnits = units.length;
+      let summaryText = `จำแนก ${totalUnits} หน่วยที่มีข้อมูลครบเป็น ${details.length} บุคลิก: ${summaryParts}.`;
+      if (riskGroup) {
+        const riskUnits = riskGroup.members.map(member => member.unit).join(', ');
+        summaryText += ` กลุ่มเสี่ยงต้องเร่งฟื้นฟูคือ ${riskUnits}.`;
+      }
+
+      return { summary: summaryText, details };
+    }
+
+    function renderPersonaCards(container, details) {
+      container.innerHTML = '';
+      details.forEach(detail => {
+        const card = document.createElement('div');
+        card.className = `persona-card ${detail.tone}`;
+        const averageLabel = `Happy ${formatPersonaMetric(detail.averages.happiness)} • Engagement ${formatPersonaMetric(detail.averages.engagement)}`;
+        card.innerHTML = `
+          <div class="persona-header">
+            <span class="persona-tag">${detail.label}</span>
+            <span class="persona-score">${averageLabel}</span>
+          </div>
+          <p class="persona-desc">${detail.description}</p>
+          <p class="persona-focus"><strong>โฟกัส:</strong> ${detail.focus}</p>
+          <div class="persona-members">
+            ${detail.members
+              .map(member => `<span class="persona-chip">${member.unit} (${member.happiness.toFixed(1)}% / ${member.engagement.toFixed(1)}%)</span>`)
+              .join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
     const unitsData = {
       "หอพัก": {
         happy: "90.0%",
@@ -1750,6 +2023,19 @@
         ]
       }
     };
+
+    const personaSummaryElement = document.getElementById('personaSummary');
+    const personaGridElement = document.getElementById('personaGrid');
+
+    if (personaSummaryElement && personaGridElement) {
+      const personaResult = analyzeEngagementPersonas(unitsData);
+      if (personaResult.details.length) {
+        personaSummaryElement.textContent = personaResult.summary;
+        renderPersonaCards(personaGridElement, personaResult.details);
+      } else {
+        personaSummaryElement.textContent = personaResult.summary;
+      }
+    }
 
     const satisfactionDimensionData = [
       { unit: 'สำนักงาน', command: 87.6, compensation: 86.0, jobNature: 84.5, environment: 90.0, growth: 85.2 },
