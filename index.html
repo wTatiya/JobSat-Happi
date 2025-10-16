@@ -353,6 +353,50 @@
       color: var(--accent);
     }
 
+    .commitment-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .commitment-table th,
+    .commitment-table td {
+      border-bottom: 1px solid rgba(44, 61, 122, 0.12);
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    .commitment-table th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .commitment-table td strong {
+      color: var(--primary);
+    }
+
+    .commitment-insight {
+      background: rgba(43, 177, 168, 0.12);
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: #126b64;
+      font-size: 0.9rem;
+      margin-top: 12px;
+    }
+
+    .trend-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
     footer {
       margin-top: 24px;
       font-size: 0.8rem;
@@ -652,6 +696,25 @@
           </div>
         </div>
       </div>
+
+      <div class="card">
+        <h3>Commitment vs. Resignation Analysis</h3>
+        <p class="hint">เชื่อมโยงคะแนนความผูกพันกับจำนวนการลาออกเพื่อดูว่าหน่วยที่มีผูกพันต่ำมีการสูญเสียกำลังคนสูงเพียงใด</p>
+        <div class="commitment-insight" id="commitmentSummary"></div>
+        <div class="table-wrapper">
+          <table class="commitment-table">
+            <thead>
+              <tr>
+                <th>หน่วยงาน</th>
+                <th>ความผูกพัน (Commitment)</th>
+                <th>จำนวนลาออก 2568</th>
+              </tr>
+            </thead>
+            <tbody id="commitmentTable"></tbody>
+          </table>
+        </div>
+        <div class="alert-list" id="commitmentInsights"></div>
+      </div>
     </section>
 
     <footer>ที่มา: รายงาน Happinometer, การผูกพัน และ Job Satisfaction ฝ่ายการพยาบาล ปี 2568</footer>
@@ -770,6 +833,56 @@
     });
 
     updateUnitDetails(unitSelect.value);
+
+    const commitmentData = [
+      { unit: 'OR', commitment: 58, resignations: 6 },
+      { unit: 'MICU', commitment: 61, resignations: 3 },
+      { unit: 'DR', commitment: 63, resignations: 3 },
+      { unit: 'บางพระ', commitment: 67, resignations: 3 },
+      { unit: 'Refer', commitment: 69, resignations: 2 },
+      { unit: '18D', commitment: 72, resignations: 2 },
+      { unit: '23A', commitment: 74, resignations: 2 }
+    ];
+
+    const commitmentTable = document.getElementById('commitmentTable');
+    const commitmentSummary = document.getElementById('commitmentSummary');
+    const commitmentInsights = document.getElementById('commitmentInsights');
+
+    const totalResignations = commitmentData.reduce((sum, item) => sum + item.resignations, 0);
+    const lowCommitment = commitmentData.filter(item => item.commitment < 65);
+    const highCommitment = commitmentData.filter(item => item.commitment >= 70);
+
+    commitmentData.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><strong>${item.unit}</strong></td>
+        <td>${item.commitment}%</td>
+        <td>${item.resignations} คน</td>
+      `;
+      commitmentTable.appendChild(row);
+    });
+
+    const lowResignations = lowCommitment.reduce((sum, item) => sum + item.resignations, 0);
+    const highResignations = highCommitment.reduce((sum, item) => sum + item.resignations, 0);
+    const shareLow = Math.round((lowResignations / totalResignations) * 100);
+    const shareHigh = Math.round((highResignations / totalResignations) * 100);
+
+    commitmentSummary.innerHTML = `
+      หน่วยที่มีความผูกพันต่ำกว่า 65% (${lowCommitment.length} หน่วย) คิดเป็น <span class="trend-indicator">${shareLow}%</span> ของการลาออกทั้งหมด (${lowResignations}/${totalResignations} คน) ขณะที่หน่วยที่มีคะแนน ≥ 70% มีเพียง ${shareHigh}% ของการลาออก (${highResignations} คน)
+    `;
+
+    const insightItems = [
+      'OR มีผูกพันเพียง 58% แต่มีการลาออกสูงสุด 6 คน ต้องเร่งเสริมแผนรักษาคนโดยเฉพาะ N 4 คนและ PN 2 คน',
+      'MICU และ DR อยู่ในกลุ่มผูกพันต่ำ (<65%) และสูญเสียรวม 6 คน สอดคล้องกับคะแนน Relax ต่ำและเวรหนัก',
+      'หน่วยที่รักษาผูกพัน ≥70% เช่น 18D และ 23A มีการลาออกเพียง 2 คน แสดงผลของการสื่อสารและการสนับสนุนที่ต่อเนื่อง'
+    ];
+
+    insightItems.forEach(text => {
+      const item = document.createElement('div');
+      item.className = 'alert-item';
+      item.textContent = text;
+      commitmentInsights.appendChild(item);
+    });
   </script>
 </body>
 </html>
