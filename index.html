@@ -331,6 +331,79 @@
       cursor: default;
     }
 
+    .matrix-wrapper {
+      overflow-x: auto;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 480px;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      padding: 10px 12px;
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .matrix-table th {
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .matrix-table td {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .matrix-cell {
+      border-radius: 12px;
+      padding: 8px 0;
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--primary);
+      min-height: 40px;
+    }
+
+    .matrix-cell.positive {
+      color: #11655f;
+    }
+
+    .matrix-cell.negative {
+      color: #a44a2d;
+    }
+
+    .matrix-cell.diagonal {
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+    }
+
+    .matrix-legend {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-swatch {
+      width: 28px;
+      height: 12px;
+      border-radius: 999px;
+    }
+
     .cluster-grid {
       display: grid;
       gap: 18px;
@@ -907,6 +980,20 @@
           </div>
         </div>
       </div>
+
+      <div class="card">
+        <h3>Diagnostic &amp; Relationship Analysis</h3>
+        <p class="hint">สำรวจความสัมพันธ์ระหว่างมิติความพึงพอใจหลัก (การบังคับบัญชา ค่าตอบแทน ลักษณะงาน สิ่งแวดล้อม และโอกาสเติบโต) เพื่อระบุว่าคู่มิติใดเคลื่อนไปด้วยกันหรือสวนทางกัน</p>
+        <div class="metric" id="diagnosticSummary" style="background: rgba(43, 177, 168, 0.12);"></div>
+        <div class="matrix-wrapper">
+          <table class="matrix-table" id="satisfactionCorrelationMatrix"></table>
+        </div>
+        <div class="matrix-legend">
+          <span class="legend-item"><span class="legend-swatch" style="background: rgba(43, 177, 168, 0.45);"></span>สัมพันธ์เชิงบวก</span>
+          <span class="legend-item"><span class="legend-swatch" style="background: rgba(255, 138, 91, 0.45);"></span>สัมพันธ์เชิงลบ</span>
+        </div>
+        <div class="alert-list" id="diagnosticInsights"></div>
+      </div>
     </section>
 
     <section id="focus" class="panel">
@@ -1070,7 +1157,7 @@
 
       <div class="card">
         <h3>Regression: ตัวแปรที่คาดการณ์การลาออก</h3>
-        <p class="hint">วิเคราะห์ถดถอยเชิงเส้นจากข้อมูล 7 หน่วยบริการ โดยปรับมาตรฐานคะแนนแต่ละมิติเพื่อเปรียบเทียบอิทธิพลต่อจำนวนลาออก (β เป็นค่าที่สูงขึ้นหมายถึงผลกระทบมากขึ้น)</p>
+        <p class="hint">วิเคราะห์ถดถอยเชิงเส้นจากคะแนนความพึงพอใจ ความสุข และความผูกพันของ 7 หน่วยงาน เพื่อเทียบอิทธิพลต่อจำนวนลาออก (β &gt; 0 หมายถึงคะแนนสูงขึ้นสัมพันธ์กับลาออกเพิ่มขึ้น)</p>
         <div class="commitment-insight" id="regressionSummary"></div>
         <div class="table-wrapper">
           <table class="commitment-table regression-table">
@@ -1664,6 +1751,27 @@
       }
     };
 
+    const satisfactionDimensionData = [
+      { unit: 'สำนักงาน', command: 87.6, compensation: 86.0, jobNature: 84.5, environment: 90.0, growth: 85.2 },
+      { unit: 'CSSD', command: 85.6, compensation: 82.2, jobNature: 80.4, environment: 88.0, growth: 81.6 },
+      { unit: 'OPD2', command: 82.0, compensation: 83.4, jobNature: 81.2, environment: 85.4, growth: 80.8 },
+      { unit: 'PICU', command: 72.8, compensation: 71.5, jobNature: 70.4, environment: 92.8, growth: 69.0 },
+      { unit: 'ER', command: 75.2, compensation: 68.2, jobNature: 72.0, environment: 75.6, growth: 70.3 },
+      { unit: 'ไตเทียม', command: 68.8, compensation: 66.8, jobNature: 71.0, environment: 78.0, growth: 69.4 },
+      { unit: 'SICU', command: 70.5, compensation: 72.0, jobNature: 67.8, environment: 74.0, growth: 68.6 },
+      { unit: 'ปฐมภูมิ', command: 80.2, compensation: 78.6, jobNature: 82.4, environment: 83.5, growth: 81.0 }
+    ];
+
+    const satisfactionDimensionKeys = ['command', 'compensation', 'jobNature', 'environment', 'growth'];
+
+    const satisfactionDimensionLabels = {
+      command: 'การบังคับบัญชา',
+      compensation: 'ค่าตอบแทนและสวัสดิการ',
+      jobNature: 'ลักษณะงาน',
+      environment: 'สิ่งแวดล้อมการทำงาน',
+      growth: 'โอกาสเติบโต'
+    };
+
     const tabButtons = document.querySelectorAll('.tab-button');
     const panels = document.querySelectorAll('.panel');
 
@@ -1754,13 +1862,13 @@
     });
 
     const resignationTrendData = [
-      { unit: 'OR', current: 6, commitment: 58, engagement: 60, happiness: 62, workloadPressure: 0.78, mitigation: 0.18 },
-      { unit: 'MICU', current: 3, commitment: 61, engagement: 63, happiness: 59, workloadPressure: 0.74, mitigation: 0.18 },
-      { unit: 'DR', current: 3, commitment: 63, engagement: 65, happiness: 64, workloadPressure: 0.68, mitigation: 0.15 },
-      { unit: 'บางพระ', current: 3, commitment: 67, engagement: 68, happiness: 66, workloadPressure: 0.6, mitigation: 0.12 },
-      { unit: 'Refer', current: 2, commitment: 69, engagement: 70, happiness: 65, workloadPressure: 0.58, mitigation: 0.12 },
-      { unit: '18D', current: 2, commitment: 72, engagement: 74, happiness: 71, workloadPressure: 0.48, mitigation: 0.25 },
-      { unit: '23A', current: 2, commitment: 74, engagement: 75, happiness: 73, workloadPressure: 0.45, mitigation: 0.28 }
+      { unit: 'OR', current: 6, commitment: 58, engagement: 60, happiness: 62, satisfaction: 68, workloadPressure: 0.78, mitigation: 0.18 },
+      { unit: 'MICU', current: 3, commitment: 61, engagement: 63, happiness: 59, satisfaction: 66, workloadPressure: 0.74, mitigation: 0.18 },
+      { unit: 'DR', current: 3, commitment: 63, engagement: 65, happiness: 64, satisfaction: 70, workloadPressure: 0.68, mitigation: 0.15 },
+      { unit: 'บางพระ', current: 3, commitment: 67, engagement: 68, happiness: 66, satisfaction: 72, workloadPressure: 0.6, mitigation: 0.12 },
+      { unit: 'Refer', current: 2, commitment: 69, engagement: 70, happiness: 68, satisfaction: 73, workloadPressure: 0.58, mitigation: 0.2 },
+      { unit: '18D', current: 2, commitment: 72, engagement: 74, happiness: 71, satisfaction: 75, workloadPressure: 0.55, mitigation: 0.22 },
+      { unit: '23A', current: 2, commitment: 74, engagement: 76, happiness: 72, satisfaction: 76, workloadPressure: 0.52, mitigation: 0.25 }
     ];
 
     let comparativeUnits = [];
@@ -1787,7 +1895,9 @@
       const comparativeMap = new Map();
 
       resignationTrendData.forEach(item => {
-        const satisfaction = (item.commitment + item.engagement + item.happiness) / 3;
+        const satisfaction = Number.isFinite(item.satisfaction)
+          ? item.satisfaction
+          : (item.commitment + item.engagement + item.happiness) / 3;
         comparativeMap.set(item.unit, {
           unit: item.unit,
           commitment: item.commitment,
@@ -1915,7 +2025,9 @@
     ) {
       const satisfactionResignData = resignationTrendData.map(item => ({
         unit: item.unit,
-        satisfaction: (item.commitment + item.engagement + item.happiness) / 3,
+        satisfaction: Number.isFinite(item.satisfaction)
+          ? item.satisfaction
+          : (item.commitment + item.engagement + item.happiness) / 3,
         resignations: item.current
       }));
 
@@ -2135,35 +2247,25 @@
     const regressionInsights = document.getElementById('regressionInsights');
 
     if (regressionSummary && regressionTableBody && regressionInsights) {
-      const regressionFeatures = ['commitment', 'engagement', 'happiness', 'workloadPressure', 'mitigation'];
+      const regressionFeatures = ['satisfaction', 'happiness', 'commitment'];
       const featureLabels = {
-        commitment: 'ความผูกพัน (Commitment)',
-        engagement: 'ความผูกพันต่อองค์กร (Engagement)',
+        satisfaction: 'ความพึงพอใจงาน (Job Satisfaction)',
         happiness: 'ความสุขรวม (Happiness Index)',
-        workloadPressure: 'แรงกดดันจากภาระงาน',
-        mitigation: 'แผนลดความเสี่ยง (Mitigation)'
+        commitment: 'ความผูกพัน (Commitment)'
       };
 
       const nuanceMap = {
-        commitment: {
-          positive: 'ต้องทบทวนคุณภาพการมีส่วนร่วม เพราะคะแนนผูกพันที่สูงขึ้นยังสัมพันธ์กับลาออกที่เพิ่มขึ้น',
-          negative: 'การยกระดับความผูกพันช่วยลดโอกาสลาออกของหน่วยนั้นอย่างมีนัยสำคัญ'
-        },
-        engagement: {
-          positive: 'ควรตรวจสอบองค์ประกอบเชิงคุณภาพ เพราะการมีส่วนร่วมที่สูงยังไม่เพียงพอที่จะลดการลาออก',
-          negative: 'การเสริมโครงการมีส่วนร่วมทำให้การลาออกชะลอลงอย่างชัดเจน'
+        satisfaction: {
+          positive: 'ต้องเจาะลึกเชิงคุณภาพเพราะคะแนนความพึงพอใจสูงขึ้นแต่ยังสัมพันธ์กับการลาออกที่เพิ่มขึ้น',
+          negative: 'การยกระดับความพึงพอใจหน้างานช่วยลดโอกาสลาออกอย่างมีนัยสำคัญ'
         },
         happiness: {
-          positive: 'คะแนนความสุขที่สูงขึ้นยังสัมพันธ์กับการลาออก จึงควรแยกดูมิติเฉพาะที่อาจยังมีปัญหา',
-          negative: 'การยกระดับความสุขหน้างานช่วยสร้างแรงจูงใจให้ทีมอยู่ต่อ'
+          positive: 'คะแนนความสุขที่สูงขึ้นยังสัมพันธ์กับลาออก จึงควรหาปัจจัยกดดันที่ยังไม่ถูกแก้ไข',
+          negative: 'การลงทุนเพิ่มประสบการณ์ความสุขช่วยตรึงบุคลากรให้อยู่กับทีม'
         },
-        workloadPressure: {
-          positive: 'ภาระงานที่กดดันสูงเป็นตัวเร่งการลาออก ต้องจัดการทรัพยากรและกระจายเวร',
-          negative: 'การควบคุมภาระงานช่วยลดแรงผลักดันให้บุคลากรลาออก'
-        },
-        mitigation: {
-          positive: 'แผนลดความเสี่ยงที่เข้มข้นยังไม่ถูกใช้อย่างมีประสิทธิภาพ ต้องทบทวนการดำเนินงาน',
-          negative: 'การลงทุนในแผนลดความเสี่ยงช่วยลดการลาออกได้จริง'
+        commitment: {
+          positive: 'คะแนนผูกพันที่เพิ่มแต่ยังลาออกสูง สะท้อนแรงจูงใจภายนอกที่ต้องจัดการเพิ่มเติม',
+          negative: 'การยกระดับความผูกพันช่วยลดการลาออกของหน่วยนั้นอย่างต่อเนื่อง'
         }
       };
 
@@ -2297,7 +2399,7 @@
 
       const boundedRSquared = Math.max(0, Math.min(1, rSquared));
       regressionSummary.innerHTML = `
-        แบบจำลองถดถอยเชิงเส้นอธิบายความแปรปรวนของจำนวนลาออกได้ <span class="trend-indicator">${(boundedRSquared * 100).toFixed(1)}%</span> โดยวัดผลจากข้อมูล 7 หน่วยงานและคะแนนเชิงดัชนีที่ผ่านการปรับมาตรฐาน
+        แบบจำลองถดถอยเชิงเส้นที่ใช้คะแนนความพึงพอใจ ความสุข และความผูกพัน อธิบายความแปรปรวนของจำนวนลาออกได้ <span class="trend-indicator">${(boundedRSquared * 100).toFixed(1)}%</span> จากข้อมูล 7 หน่วยงาน (คะแนนถูกปรับมาตรฐานก่อนคำนวณ)
       `;
 
       const topRisk = regressionResults.find(result => result.coefficient > 0);
@@ -2305,11 +2407,12 @@
 
       const insightMessages = [];
       if (topRisk) {
-        insightMessages.push(`${featureLabels[topRisk.key]} (β = ${topRisk.coefficient.toFixed(2)}) เป็นตัวเร่งการลาออกสูงสุด จำเป็นต้องจัดการเพื่อลดแรงกดดันหรือเพิ่มแรงจูงใจเชิงบวก`);
+        insightMessages.push(`${featureLabels[topRisk.key]} (β = ${topRisk.coefficient.toFixed(2)}) เป็นตัวเร่งการลาออกสูงสุด ควรตั้งมาตรการเฉพาะเพื่อลดแรงผลักดันในมิตินี้`);
       }
       if (topProtective) {
         insightMessages.push(`${featureLabels[topProtective.key]} (β = ${topProtective.coefficient.toFixed(2)}) ทำหน้าที่เป็นเกราะป้องกัน หากเพิ่มคะแนนในมิตินี้ได้อีกจะช่วยลดจำนวนลาออก`);
       }
+      insightMessages.push('ค่า β > 0 หมายถึงคะแนนสูงขึ้นสัมพันธ์กับลาออกเพิ่มขึ้น ส่วนค่า β < 0 บ่งชี้ผลเชิงป้องกัน ต้องติดตามการเปลี่ยนแปลงรายไตรมาส');
 
       regressionInsights.innerHTML = '';
       insightMessages.forEach(message => {
@@ -2317,6 +2420,182 @@
         item.className = 'alert-item';
         item.textContent = message;
         regressionInsights.appendChild(item);
+      });
+    }
+
+    const diagnosticSummaryElement = document.getElementById('diagnosticSummary');
+    const satisfactionMatrixElement = document.getElementById('satisfactionCorrelationMatrix');
+    const diagnosticInsightsElement = document.getElementById('diagnosticInsights');
+
+    if (diagnosticSummaryElement && satisfactionMatrixElement && diagnosticInsightsElement) {
+      const correlationCache = new Map();
+
+      function getCorrelationValue(dimA, dimB) {
+        if (dimA === dimB) {
+          return 1;
+        }
+        const key = [dimA, dimB].sort().join('|');
+        if (!correlationCache.has(key)) {
+          correlationCache.set(key, calculatePearson(satisfactionDimensionData, dimA, dimB));
+        }
+        return correlationCache.get(key);
+      }
+
+      function getMatrixColor(value) {
+        const intensity = Math.min(1, Math.abs(value));
+        const minAlpha = 0.12;
+        const maxAlpha = 0.58;
+        const alpha = (minAlpha + (maxAlpha - minAlpha) * intensity).toFixed(2);
+        const base = value >= 0 ? '43, 177, 168' : '255, 138, 91';
+        return `rgba(${base}, ${alpha})`;
+      }
+
+      satisfactionMatrixElement.innerHTML = '';
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      const corner = document.createElement('th');
+      corner.textContent = '';
+      headerRow.appendChild(corner);
+      satisfactionDimensionKeys.forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = satisfactionDimensionLabels[key];
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      satisfactionMatrixElement.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      const dimensionPairs = [];
+
+      satisfactionDimensionKeys.forEach((rowKey, rowIndex) => {
+        const tr = document.createElement('tr');
+        const rowHeader = document.createElement('th');
+        rowHeader.textContent = satisfactionDimensionLabels[rowKey];
+        tr.appendChild(rowHeader);
+
+        satisfactionDimensionKeys.forEach((colKey, colIndex) => {
+          const td = document.createElement('td');
+          const wrapper = document.createElement('div');
+          wrapper.className = 'matrix-cell';
+
+          if (rowKey === colKey) {
+            wrapper.classList.add('diagonal');
+            wrapper.textContent = '1.00';
+          } else {
+            const value = getCorrelationValue(rowKey, colKey);
+            wrapper.classList.add(value >= 0 ? 'positive' : 'negative');
+            wrapper.style.background = getMatrixColor(value);
+            wrapper.textContent = value.toFixed(2);
+            td.title = `${satisfactionDimensionLabels[rowKey]} ↔ ${satisfactionDimensionLabels[colKey]} (r = ${value.toFixed(2)})`;
+            if (colIndex > rowIndex) {
+              dimensionPairs.push({ keyA: rowKey, keyB: colKey, value });
+            }
+          }
+
+          td.appendChild(wrapper);
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      satisfactionMatrixElement.appendChild(tbody);
+
+      const positivePairs = dimensionPairs.filter(pair => pair.value > 0);
+      const negativePairs = dimensionPairs.filter(pair => pair.value < 0);
+      const topPositive = positivePairs.sort((a, b) => b.value - a.value)[0] || null;
+      const topNegative = negativePairs.sort((a, b) => a.value - b.value)[0] || null;
+
+      const topPositiveUnits = topPositive
+        ? satisfactionDimensionData
+            .filter(item => item[topPositive.keyA] >= 80 && item[topPositive.keyB] >= 80)
+            .map(item => item.unit)
+        : [];
+
+      const summarySegments = [];
+      if (topPositiveUnits.length) {
+        summarySegments.push(`พบคะแนน ≥80% ทั้งคู่ใน ${topPositiveUnits.join(', ')}`);
+      } else if (topPositive) {
+        summarySegments.push('คะแนนทั้งสองมิติเคลื่อนในทิศทางเดียวกันในหลายหน่วยงาน');
+      }
+
+      if (topNegative) {
+        const divergenceUnits = satisfactionDimensionData
+          .filter(item => Math.abs(item[topNegative.keyA] - item[topNegative.keyB]) >= 12)
+          .map(item => `${item.unit} (${item[topNegative.keyA].toFixed(1)}% / ${item[topNegative.keyB].toFixed(1)}%)`);
+        const divergenceText = divergenceUnits.length
+          ? `โดยมีช่องว่างเด่นใน ${divergenceUnits.join(', ')}`
+          : 'ควรเฝ้าระวังไม่ให้คะแนนทั้งสองมิติแยกทิศกัน';
+        summarySegments.push(`คู่ที่สวนทางมากที่สุดคือ ${satisfactionDimensionLabels[topNegative.keyA]} ↔ ${satisfactionDimensionLabels[topNegative.keyB]} (r = ${topNegative.value.toFixed(2)}) ${divergenceText}`);
+      }
+
+      summarySegments.push(`ใช้ข้อมูล ${satisfactionDimensionData.length} หน่วยงานในการคำนวณ`);
+
+      const positiveLabel = topPositive
+        ? `${satisfactionDimensionLabels[topPositive.keyA]} ↔ ${satisfactionDimensionLabels[topPositive.keyB]} (r = ${topPositive.value.toFixed(2)})`
+        : 'ยังไม่พบความสัมพันธ์เด่น';
+
+      diagnosticSummaryElement.innerHTML = `
+        <span class="metric-title">คู่มิติที่สัมพันธ์สูงสุด</span>
+        <span class="metric-value">${positiveLabel}</span>
+        <p class="metric-desc">${summarySegments.join(' | ')}</p>
+      `;
+
+      const insights = [];
+
+      if (topPositive) {
+        const highUnitsDetailed = satisfactionDimensionData
+          .filter(item => item[topPositive.keyA] >= 80 && item[topPositive.keyB] >= 80)
+          .map(item => `${item.unit} (${item[topPositive.keyA].toFixed(1)}% / ${item[topPositive.keyB].toFixed(1)}%)`);
+        const highlightText = highUnitsDetailed.length
+          ? `ตัวอย่างหน่วยที่ทำได้ดีคือ ${highUnitsDetailed.join(', ')}`
+          : 'ควรออกแบบโครงการที่ยกระดับทั้งสองมิติควบคู่กันในหน่วยคะแนนปานกลาง';
+        insights.push(`${satisfactionDimensionLabels[topPositive.keyA]} และ ${satisfactionDimensionLabels[topPositive.keyB]} เคลื่อนไปในทิศทางเดียวกัน (r = ${topPositive.value.toFixed(2)}) ${highlightText}`);
+      }
+
+      if (topNegative) {
+        const divergenceUnitsDetailed = satisfactionDimensionData
+          .filter(item => Math.abs(item[topNegative.keyA] - item[topNegative.keyB]) >= 12)
+          .map(item => `${item.unit} (${item[topNegative.keyA].toFixed(1)}% / ${item[topNegative.keyB].toFixed(1)}%)`);
+        const divergenceText = divergenceUnitsDetailed.length
+          ? `ต้องโฟกัส ${divergenceUnitsDetailed.join(', ')} เพื่อสร้างความสมดุล`
+          : 'ควรกำหนดตัวชี้วัดร่วมเพื่อไม่ให้สองมิตินี้แยกทิศ';
+        insights.push(`${satisfactionDimensionLabels[topNegative.keyA]} และ ${satisfactionDimensionLabels[topNegative.keyB]} มีแนวโน้มสวนทาง (r = ${topNegative.value.toFixed(2)}) ${divergenceText}`);
+      }
+
+      const dimensionAverages = satisfactionDimensionKeys
+        .map(key => ({ key, avg: calculateAverage(satisfactionDimensionData, key) }))
+        .sort((a, b) => b.avg - a.avg);
+
+      if (dimensionAverages.length) {
+        const highestAvg = dimensionAverages[0];
+        const lowestAvg = dimensionAverages[dimensionAverages.length - 1];
+        insights.push(`ค่าเฉลี่ยสูงสุดคือ ${satisfactionDimensionLabels[highestAvg.key]} ${highestAvg.avg.toFixed(1)}% ขณะที่ต่ำสุดคือ ${satisfactionDimensionLabels[lowestAvg.key]} ${lowestAvg.avg.toFixed(1)}% ชี้ลำดับความสำคัญในการลงทุน`);
+      }
+
+      const unitProfiles = satisfactionDimensionData
+        .map(item => ({
+          unit: item.unit,
+          avg: satisfactionDimensionKeys.reduce((sum, key) => sum + item[key], 0) / satisfactionDimensionKeys.length
+        }))
+        .sort((a, b) => b.avg - a.avg);
+
+      if (unitProfiles.length) {
+        const topUnit = unitProfiles[0];
+        const bottomUnit = unitProfiles[unitProfiles.length - 1];
+        insights.push(`หน่วยที่ทำคะแนนภาพรวมดีสุดคือ ${topUnit.unit} (เฉลี่ย ${topUnit.avg.toFixed(1)}%) ขณะที่ ${bottomUnit.unit} (${bottomUnit.avg.toFixed(1)}%) ต้องได้รับการสนับสนุนเชิงลึก`);
+      }
+
+      if (!insights.length) {
+        insights.push('ใช้เมทริกซ์เพื่อออกแบบแผนเสริมแต่ละมิติให้ขับเคลื่อนไปในทิศทางเดียวกันกับคะแนนรวม');
+      }
+
+      diagnosticInsightsElement.innerHTML = '';
+      insights.forEach(message => {
+        const item = document.createElement('div');
+        item.className = 'alert-item';
+        item.textContent = message;
+        diagnosticInsightsElement.appendChild(item);
       });
     }
 
