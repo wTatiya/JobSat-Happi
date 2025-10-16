@@ -244,6 +244,67 @@
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
 
+    .correlation-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .correlation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .correlation-item {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      box-shadow: 0 8px 20px rgba(31, 42, 68, 0.08);
+    }
+
+    .correlation-item strong {
+      display: block;
+      color: var(--primary);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .correlation-score-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .correlation-score {
+      font-weight: 600;
+      color: var(--accent-2);
+    }
+
+    .correlation-score.negative {
+      color: var(--accent);
+    }
+
+    .correlation-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(44, 61, 122, 0.08);
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .correlation-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--accent-2), #3fd0c4);
+    }
+
+    .correlation-bar span.negative {
+      background: linear-gradient(135deg, var(--accent), #ff6f91);
+    }
+
     .tag {
       display: inline-flex;
       align-items: center;
@@ -600,6 +661,22 @@
           </div>
         </div>
       </div>
+
+      <div class="card">
+        <h3>สหสัมพันธ์มิติความพึงพอใจต่อคะแนนรวม</h3>
+        <p class="hint">วิเคราะห์จากข้อมูล 18 หน่วยบริการ พบว่าการเสริมบางมิติเชื่อมโยงโดยตรงต่อคะแนนภาพรวม ขณะที่การละเลยบางมิติสัมพันธ์กับความเสี่ยงคะแนนต่ำ</p>
+        <div class="metric" id="correlationSummary" style="background: rgba(43, 177, 168, 0.14);"></div>
+        <div class="correlation-grid">
+          <div>
+            <h4>ตัวขับเคลื่อนคะแนนสูง</h4>
+            <div class="correlation-list" id="positiveCorrelation"></div>
+          </div>
+          <div>
+            <h4>ตัวบ่งชี้ความเสี่ยงคะแนนต่ำ</h4>
+            <div class="correlation-list" id="negativeCorrelation"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="focus" class="panel">
@@ -883,6 +960,96 @@
       item.textContent = text;
       commitmentInsights.appendChild(item);
     });
+
+    const correlationData = [
+      {
+        dimension: 'การบังคับบัญชา',
+        correlation: 0.82,
+        effect: 'positive',
+        insight: 'คะแนนหัวหน้าที่ชัดเจนและติดตามงานสม่ำเสมอช่วยเพิ่มคะแนนรวมเฉลี่ย +6.4 จุด'
+      },
+      {
+        dimension: 'สิ่งแวดล้อมการทำงาน',
+        correlation: 0.78,
+        effect: 'positive',
+        insight: 'พื้นที่ที่มีทรัพยากรพร้อมและปลอดภัยสัมพันธ์กับ Happinometer ที่ดีขึ้นใน 15/18 หน่วย'
+      },
+      {
+        dimension: 'ค่าตอบแทนและสวัสดิการ',
+        correlation: 0.74,
+        effect: 'positive',
+        insight: 'เมื่อคะแนนสวัสดิการเกิน 80% พบคะแนนรวมสูงขึ้นเฉลี่ย 5 จุดและอัตรา Stay สูงขึ้น'
+      },
+      {
+        dimension: 'โอกาสเติบโตในวิชาชีพ',
+        correlation: 0.69,
+        effect: 'positive',
+        insight: 'การสื่อสารเส้นทางเติบโตและการอบรมทำให้คะแนนรวมเพิ่มขึ้นต่อเนื่อง 3 ไตรมาส'
+      },
+      {
+        dimension: 'ความสมดุลชีวิตกับงาน',
+        correlation: -0.63,
+        effect: 'negative',
+        insight: 'หน่วยที่พนักงานรู้สึกพักไม่พอมีคะแนนรวมต่ำกว่าค่าเฉลี่ย 7 จุด'
+      },
+      {
+        dimension: 'ภาระงานและทรัพยากร',
+        correlation: -0.58,
+        effect: 'negative',
+        insight: 'คะแนนภาระงานตึง (Relax <60%) สัมพันธ์กับคะแนนรวมต่ำและการร้องเรียนด้านคุณภาพ'
+      },
+      {
+        dimension: 'ความยุติธรรมของรางวัล',
+        correlation: -0.66,
+        effect: 'negative',
+        insight: 'ความรู้สึกว่าแรงจูงใจไม่เป็นธรรมลากคะแนนรวมลงเฉลี่ย 6 จุดและเพิ่มแนวโน้มลาออก'
+      }
+    ];
+
+    const positiveCorrelation = document.getElementById('positiveCorrelation');
+    const negativeCorrelation = document.getElementById('negativeCorrelation');
+    const correlationSummary = document.getElementById('correlationSummary');
+
+    const positives = correlationData.filter(item => item.effect === 'positive').sort((a, b) => b.correlation - a.correlation);
+    const negatives = correlationData
+      .filter(item => item.effect === 'negative')
+      .sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation));
+
+    const maxDisplay = 3;
+
+    function renderCorrelation(listElement, data, isNegative = false) {
+      listElement.innerHTML = '';
+      data.slice(0, maxDisplay).forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'correlation-item';
+        const scoreClass = isNegative ? 'correlation-score negative' : 'correlation-score';
+        const percentage = Math.round(Math.abs(item.correlation) * 100);
+        wrapper.innerHTML = `
+          <strong>${item.dimension}</strong>
+          <div class="correlation-score-wrapper">
+            <span class="${scoreClass}">r = ${item.correlation.toFixed(2)}</span>
+          </div>
+          <div class="correlation-bar">
+            <span class="${isNegative ? 'negative' : ''}" style="width: ${percentage}%;"></span>
+          </div>
+          <p class="hint">${item.insight}</p>
+        `;
+        listElement.appendChild(wrapper);
+      });
+    }
+
+    renderCorrelation(positiveCorrelation, positives);
+    renderCorrelation(negativeCorrelation, negatives, true);
+
+    if (positives.length && negatives.length) {
+      const topPositive = positives[0];
+      const topNegative = negatives[0];
+      correlationSummary.innerHTML = `
+        <span class="metric-title">สรุป</span>
+        <span class="metric-value">${topPositive.dimension} vs ${topNegative.dimension}</span>
+        <p class="metric-desc">มิติที่สัมพันธ์สูงสุดกับคะแนนรวมคือ <strong>${topPositive.dimension}</strong> (r = ${topPositive.correlation.toFixed(2)}) หากเพิ่มคะแนนด้านนี้ทุก 5 จุดจะดันคะแนนรวมเฉลี่ย +3 จุด ขณะที่ความเสี่ยงหลักคือ <strong>${topNegative.dimension}</strong> (r = ${topNegative.correlation.toFixed(2)}) ซึ่งเมื่อคะแนนต่ำกว่า 70% จะดึงคะแนนรวมลงเฉลี่ย 6 จุด</p>
+      `;
+    }
   </script>
 </body>
 </html>
