@@ -556,6 +556,17 @@
       color: var(--primary);
     }
 
+    .regression-table th:nth-child(2),
+    .regression-table td:nth-child(2) {
+      text-align: center;
+      width: 120px;
+      white-space: nowrap;
+    }
+
+    .regression-table td:nth-child(3) {
+      max-width: 420px;
+    }
+
     .commitment-insight {
       background: rgba(43, 177, 168, 0.12);
       border-radius: 14px;
@@ -1017,6 +1028,25 @@
           </table>
         </div>
         <div class="alert-list" id="commitmentInsights"></div>
+      </div>
+
+      <div class="card">
+        <h3>Regression: ตัวแปรที่คาดการณ์การลาออก</h3>
+        <p class="hint">วิเคราะห์ถดถอยเชิงเส้นจากข้อมูล 7 หน่วยบริการ โดยปรับมาตรฐานคะแนนแต่ละมิติเพื่อเปรียบเทียบอิทธิพลต่อจำนวนลาออก (β เป็นค่าที่สูงขึ้นหมายถึงผลกระทบมากขึ้น)</p>
+        <div class="commitment-insight" id="regressionSummary"></div>
+        <div class="table-wrapper">
+          <table class="commitment-table regression-table">
+            <thead>
+              <tr>
+                <th>ปัจจัย</th>
+                <th>สัมประสิทธิ์ (β)</th>
+                <th>คำอธิบาย</th>
+              </tr>
+            </thead>
+            <tbody id="regressionTableBody"></tbody>
+          </table>
+        </div>
+        <div class="alert-list" id="regressionInsights"></div>
       </div>
     </section>
 
@@ -1730,6 +1760,196 @@
       item.textContent = text;
       forecastInsights.appendChild(item);
     });
+
+    const regressionSummary = document.getElementById('regressionSummary');
+    const regressionTableBody = document.getElementById('regressionTableBody');
+    const regressionInsights = document.getElementById('regressionInsights');
+
+    if (regressionSummary && regressionTableBody && regressionInsights) {
+      const regressionFeatures = ['commitment', 'engagement', 'happiness', 'workloadPressure', 'mitigation'];
+      const featureLabels = {
+        commitment: 'ความผูกพัน (Commitment)',
+        engagement: 'ความผูกพันต่อองค์กร (Engagement)',
+        happiness: 'ความสุขรวม (Happiness Index)',
+        workloadPressure: 'แรงกดดันจากภาระงาน',
+        mitigation: 'แผนลดความเสี่ยง (Mitigation)'
+      };
+
+      const nuanceMap = {
+        commitment: {
+          positive: 'ต้องทบทวนคุณภาพการมีส่วนร่วม เพราะคะแนนผูกพันที่สูงขึ้นยังสัมพันธ์กับลาออกที่เพิ่มขึ้น',
+          negative: 'การยกระดับความผูกพันช่วยลดโอกาสลาออกของหน่วยนั้นอย่างมีนัยสำคัญ'
+        },
+        engagement: {
+          positive: 'ควรตรวจสอบองค์ประกอบเชิงคุณภาพ เพราะการมีส่วนร่วมที่สูงยังไม่เพียงพอที่จะลดการลาออก',
+          negative: 'การเสริมโครงการมีส่วนร่วมทำให้การลาออกชะลอลงอย่างชัดเจน'
+        },
+        happiness: {
+          positive: 'คะแนนความสุขที่สูงขึ้นยังสัมพันธ์กับการลาออก จึงควรแยกดูมิติเฉพาะที่อาจยังมีปัญหา',
+          negative: 'การยกระดับความสุขหน้างานช่วยสร้างแรงจูงใจให้ทีมอยู่ต่อ'
+        },
+        workloadPressure: {
+          positive: 'ภาระงานที่กดดันสูงเป็นตัวเร่งการลาออก ต้องจัดการทรัพยากรและกระจายเวร',
+          negative: 'การควบคุมภาระงานช่วยลดแรงผลักดันให้บุคลากรลาออก'
+        },
+        mitigation: {
+          positive: 'แผนลดความเสี่ยงที่เข้มข้นยังไม่ถูกใช้อย่างมีประสิทธิภาพ ต้องทบทวนการดำเนินงาน',
+          negative: 'การลงทุนในแผนลดความเสี่ยงช่วยลดการลาออกได้จริง'
+        }
+      };
+
+      function calculateStats(values) {
+        const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+        const variance = values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / Math.max(1, values.length - 1);
+        const stdDev = Math.sqrt(variance) || 1;
+        return { mean, stdDev };
+      }
+
+      function standardize(value, stats) {
+        return stats.stdDev === 0 ? 0 : (value - stats.mean) / stats.stdDev;
+      }
+
+      function transpose(matrix) {
+        return matrix[0].map((_, columnIndex) => matrix.map(row => row[columnIndex]));
+      }
+
+      function multiplyMatrices(a, b) {
+        const rows = a.length;
+        const cols = b[0].length;
+        const result = Array.from({ length: rows }, () => Array(cols).fill(0));
+        for (let i = 0; i < rows; i++) {
+          for (let k = 0; k < b.length; k++) {
+            const value = a[i][k];
+            for (let j = 0; j < cols; j++) {
+              result[i][j] += value * b[k][j];
+            }
+          }
+        }
+        return result;
+      }
+
+      function multiplyMatrixVector(matrix, vector) {
+        return matrix.map(row => row.reduce((sum, value, index) => sum + value * vector[index], 0));
+      }
+
+      function invertMatrix(matrix) {
+        const n = matrix.length;
+        const augmented = matrix.map((row, i) => {
+          const identityRow = Array.from({ length: n }, (_, j) => (i === j ? 1 : 0));
+          return [...row, ...identityRow];
+        });
+
+        for (let i = 0; i < n; i++) {
+          let pivotRow = i;
+          for (let j = i + 1; j < n; j++) {
+            if (Math.abs(augmented[j][i]) > Math.abs(augmented[pivotRow][i])) {
+              pivotRow = j;
+            }
+          }
+
+          const pivotValue = augmented[pivotRow][i];
+          if (Math.abs(pivotValue) < 1e-10) {
+            throw new Error('Matrix is singular and cannot be inverted');
+          }
+
+          if (pivotRow !== i) {
+            [augmented[i], augmented[pivotRow]] = [augmented[pivotRow], augmented[i]];
+          }
+
+          const pivot = augmented[i][i];
+          for (let j = 0; j < 2 * n; j++) {
+            augmented[i][j] /= pivot;
+          }
+
+          for (let row = 0; row < n; row++) {
+            if (row !== i) {
+              const factor = augmented[row][i];
+              for (let col = 0; col < 2 * n; col++) {
+                augmented[row][col] -= factor * augmented[i][col];
+              }
+            }
+          }
+        }
+
+        return augmented.map(row => row.slice(n));
+      }
+
+      const featureStats = {};
+      regressionFeatures.forEach(key => {
+        const values = resignationTrendData.map(item => item[key]);
+        featureStats[key] = calculateStats(values);
+      });
+
+      const targetStats = calculateStats(resignationTrendData.map(item => item.current));
+      const y = resignationTrendData.map(item => standardize(item.current, targetStats));
+
+      const designMatrix = resignationTrendData.map(item => {
+        const row = [1];
+        regressionFeatures.forEach(key => {
+          row.push(standardize(item[key], featureStats[key]));
+        });
+        return row;
+      });
+
+      const transposed = transpose(designMatrix);
+      const xtx = multiplyMatrices(transposed, designMatrix);
+      const xtxInverse = invertMatrix(xtx);
+      const xty = multiplyMatrixVector(transposed, y);
+      const coefficients = multiplyMatrixVector(xtxInverse, xty);
+
+      const predictions = designMatrix.map(row => row.reduce((sum, value, index) => sum + value * coefficients[index], 0));
+      const meanY = y.reduce((sum, value) => sum + value, 0) / y.length;
+      const ssTotal = y.reduce((sum, value) => sum + Math.pow(value - meanY, 2), 0);
+      const ssResidual = y.reduce((sum, value, index) => sum + Math.pow(value - predictions[index], 2), 0);
+      const rSquared = ssTotal === 0 ? 1 : 1 - ssResidual / ssTotal;
+
+      const regressionResults = regressionFeatures.map((key, index) => {
+        const coefficient = coefficients[index + 1];
+        const direction = coefficient >= 0 ? 'positive' : 'negative';
+        return {
+          key,
+          coefficient,
+          magnitude: Math.abs(coefficient),
+          direction,
+          interpretation: `${direction === 'positive' ? 'คะแนนสูงขึ้นสัมพันธ์กับการลาออกเพิ่มขึ้น' : 'คะแนนสูงขึ้นสัมพันธ์กับการลาออกลดลง'} — ${nuanceMap[key][direction]}`
+        };
+      }).sort((a, b) => b.magnitude - a.magnitude);
+
+      regressionTableBody.innerHTML = '';
+      regressionResults.forEach(result => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${featureLabels[result.key]}</strong></td>
+          <td>${result.coefficient >= 0 ? '+' : '-'}${Math.abs(result.coefficient).toFixed(2)}</td>
+          <td><span class="hint">${result.interpretation}</span></td>
+        `;
+        regressionTableBody.appendChild(row);
+      });
+
+      const boundedRSquared = Math.max(0, Math.min(1, rSquared));
+      regressionSummary.innerHTML = `
+        แบบจำลองถดถอยเชิงเส้นอธิบายความแปรปรวนของจำนวนลาออกได้ <span class="trend-indicator">${(boundedRSquared * 100).toFixed(1)}%</span> โดยวัดผลจากข้อมูล 7 หน่วยงานและคะแนนเชิงดัชนีที่ผ่านการปรับมาตรฐาน
+      `;
+
+      const topRisk = regressionResults.find(result => result.coefficient > 0);
+      const topProtective = regressionResults.find(result => result.coefficient < 0);
+
+      const insightMessages = [];
+      if (topRisk) {
+        insightMessages.push(`${featureLabels[topRisk.key]} (β = ${topRisk.coefficient.toFixed(2)}) เป็นตัวเร่งการลาออกสูงสุด จำเป็นต้องจัดการเพื่อลดแรงกดดันหรือเพิ่มแรงจูงใจเชิงบวก`);
+      }
+      if (topProtective) {
+        insightMessages.push(`${featureLabels[topProtective.key]} (β = ${topProtective.coefficient.toFixed(2)}) ทำหน้าที่เป็นเกราะป้องกัน หากเพิ่มคะแนนในมิตินี้ได้อีกจะช่วยลดจำนวนลาออก`);
+      }
+
+      regressionInsights.innerHTML = '';
+      insightMessages.forEach(message => {
+        const item = document.createElement('div');
+        item.className = 'alert-item';
+        item.textContent = message;
+        regressionInsights.appendChild(item);
+      });
+    }
 
     const correlationData = [
       {
