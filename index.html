@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แดชบอร์ดความสุขและความผูกพัน ฝ่ายการพยาบาล</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: rgba(255, 255, 255, 0.88);
+      --primary: #2463eb;
+      --accent: #ff6b6b;
+      --text: #1f2a44;
+      --muted: #4c5772;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 32px 5vw 20px;
+      background: linear-gradient(120deg, rgba(36, 99, 235, 0.15), rgba(255, 107, 107, 0.2));
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-weight: 600;
+      font-size: clamp(28px, 4vw, 40px);
+      color: var(--text);
+    }
+
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(36, 99, 235, 0.15);
+      color: var(--primary);
+      font-size: 14px;
+      margin-right: 10px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+      padding: 0 5vw 24px;
+      margin-top: -40px;
+    }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 15px 40px rgba(15, 39, 102, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40% -60% auto;
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(140deg, rgba(36, 99, 235, 0.18), rgba(255, 107, 107, 0.2));
+      transform: rotate(35deg);
+      border-radius: 40px;
+      pointer-events: none;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 18px;
+    }
+
+    .card .value {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 12px;
+    }
+
+    .tabs {
+      padding: 10px 5vw 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tab-buttons button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(36, 99, 235, 0.12);
+      color: var(--primary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab-buttons button.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(36, 99, 235, 0.35);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fade 0.4s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .flex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .chart {
+      width: 100%;
+      min-height: 320px;
+    }
+
+    .insight-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
+
+    .insight-list li {
+      margin-bottom: 8px;
+      padding-left: 18px;
+      position: relative;
+    }
+
+    .insight-list li::before {
+      content: "✶";
+      color: var(--accent);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    th {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(36, 99, 235, 0.06);
+    }
+
+    .scenario {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(36, 99, 235, 0.3);
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.35);
+    }
+
+    .swot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .swot-card {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .swot-card h4 {
+      margin: 0 0 6px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .footnote {
+      margin-top: 30px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 26px 24px 18px;
+      }
+      .summary-grid {
+        padding: 0 24px 20px;
+      }
+      .tabs {
+        padding: 0 24px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="pill">HAPPINOMETER &amp; JOB SATISFACTION 2568</span>
+    <h1>อินโฟกราฟิกเชิงโต้ตอบ: ความสุข ความพึงพอใจ และการลาออกของบุคลากรพยาบาล</h1>
+    <p>มุมมองแบบ 360° สำหรับผู้บริหารการพยาบาล: วิเคราะห์ความผูกพัน ความพึงพอใจ และแนวโน้มการลาออกเพื่อกำหนดกลยุทธ์ดูแลบุคลากรเชิงรุก</p>
+  </header>
+
+  <section class="summary-grid" id="summaryCards"></section>
+
+  <section class="tabs">
+    <div class="tab-buttons" id="tabButtons"></div>
+
+    <div id="tab-analytics" class="tab-content active">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>การวิเคราะห์ความผูกพันเทียบการลาออก</h3>
+          <div id="commitmentScatter" class="chart"></div>
+          <ul class="insight-list" id="commitmentInsights"></ul>
+        </div>
+        <div class="card">
+          <h3>เมทริกซ์สหสัมพันธ์มิติความพึงพอใจ</h3>
+          <div id="correlationHeat" class="chart"></div>
+          <p>สีเข้มหมายถึงความสัมพันธ์เชิงบวกสูง ระบุว่ามิติใดขับเคลื่อนคะแนนภาพรวมได้มากที่สุด</p>
+        </div>
+        <div class="card">
+          <h3>รีเกรสชันพยากรณ์การลาออก</h3>
+          <div id="regressionSummary"></div>
+          <div class="scenario">
+            <label for="upliftSlider">จำลองการยกระดับคะแนนภาพรวมความพึงพอใจ (%)</label>
+            <input type="range" min="-5" max="15" step="1" value="0" id="upliftSlider">
+            <p id="simulationResult"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-cluster" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>การจัดกลุ่มหน่วยงานตามโปรไฟล์ความสุข (K-Means)</h3>
+          <div id="clusterChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>เรดาร์โปรไฟล์ความสุขตามคลัสเตอร์</h3>
+          <div id="clusterRadar" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>คำอธิบายเชิงกลยุทธ์</h3>
+          <ul class="insight-list" id="clusterInsights"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-eda" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>ฮีตแมปความพึงพอใจตามมิติ</h3>
+          <div id="satisfactionHeatmap" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>การวิเคราะห์ช่องว่าง: ความสุขคาดหวัง vs จริง</h3>
+          <div id="gapChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>หน่วยงาน Top / Bottom</h3>
+          <table id="topBottomTable"></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-strategy" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>Priority Matrix: Impact vs Performance</h3>
+          <div id="priorityMatrix" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>SWOT เชิงข้อมูล</h3>
+          <div class="swot-grid" id="swotGrid"></div>
+        </div>
+        <div class="card">
+          <h3>แผนที่ผู้มีส่วนร่วม (Engagement Personas)</h3>
+          <div id="personaChart" class="chart"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footnote">ที่มา: ข้อมูลสำรวจความผูกพัน ความพึงพอใจ HAPPINOMETER และอัตราการลาออก ปี 2568</p>
+
+  <script>
+    .insight-list li {
+      margin-bottom: 8px;
+      padding-left: 18px;
+      position: relative;
+    }
+
+    .insight-list li::before {
+      content: "✶";
+      color: var(--accent);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(255, 107, 107, 0.15);
+      color: var(--accent);
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="pill">HAPPINOMETER &amp; JOB SATISFACTION 2568</span>
+    <h1>อินโฟกราฟิกเชิงโต้ตอบ: ความสุข ความพึงพอใจ และการลาออกของบุคลากรพยาบาล</h1>
+    <p>มุมมองแบบ 360° สำหรับผู้บริหารการพยาบาล: วิเคราะห์ความผูกพัน ความพึงพอใจ และแนวโน้มการลาออกเพื่อกำหนดกลยุทธ์ดูแลบุคลากรเชิงรุก</p>
+  </header>
+
+  <section class="summary-grid" id="summaryCards"></section>
+
+  <section class="tabs">
+    <div class="tab-buttons" id="tabButtons"></div>
+
+    <div id="tab-analytics" class="tab-content active">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>การวิเคราะห์ความผูกพันเทียบการลาออก</h3>
+          <div id="commitmentScatter" class="chart"></div>
+          <ul class="insight-list" id="commitmentInsights"></ul>
+        </div>
+        <div class="card">
+          <h3>เมทริกซ์สหสัมพันธ์มิติความพึงพอใจ</h3>
+          <div id="correlationHeat" class="chart"></div>
+          <p>สีเข้มหมายถึงความสัมพันธ์เชิงบวกสูง ระบุว่ามิติใดขับเคลื่อนคะแนนภาพรวมได้มากที่สุด</p>
+        </div>
+        <div class="card">
+          <h3>รีเกรสชันพยากรณ์การลาออก</h3>
+          <div id="regressionSummary"></div>
+          <div class="scenario">
+            <label for="upliftSlider">จำลองการยกระดับคะแนนภาพรวมความพึงพอใจ (%)</label>
+            <input type="range" min="-5" max="15" step="1" value="0" id="upliftSlider">
+            <p id="simulationResult"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-cluster" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>การจัดกลุ่มหน่วยงานตามโปรไฟล์ความสุข (K-Means)</h3>
+          <div id="clusterChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>เรดาร์โปรไฟล์ความสุขตามคลัสเตอร์</h3>
+          <div id="clusterRadar" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>คำอธิบายเชิงกลยุทธ์</h3>
+          <ul class="insight-list" id="clusterInsights"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-eda" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>ฮีตแมปความพึงพอใจตามมิติ</h3>
+          <div id="satisfactionHeatmap" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>การวิเคราะห์ช่องว่าง: ความสุขคาดหวัง vs จริง</h3>
+          <div id="gapChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>หน่วยงาน Top / Bottom</h3>
+          <table id="topBottomTable"></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-strategy" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>Priority Matrix: Impact vs Performance</h3>
+          <div id="priorityMatrix" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>SWOT เชิงข้อมูล</h3>
+          <div class="swot-grid" id="swotGrid"></div>
+        </div>
+        <div class="card">
+          <h3>แผนที่ผู้มีส่วนร่วม (Engagement Personas)</h3>
+          <div id="personaChart" class="chart"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footnote">ที่มา: ข้อมูลสำรวจความผูกพัน ความพึงพอใจ HAPPINOMETER และอัตราการลาออก ปี 2568</p>
+
+  <script>
+    .scenario {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(36, 99, 235, 0.3);
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.35);
+    }
+
+    .swot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .swot-card {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .swot-card h4 {
+      margin: 0 0 6px;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .footnote {
+      margin-top: 30px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 26px 24px 18px;
+      }
+      .summary-grid {
+        padding: 0 24px 20px;
+      }
+      .tabs {
+        padding: 0 24px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="pill">HAPPINOMETER &amp; JOB SATISFACTION 2568</span>
+    <h1>อินโฟกราฟิกเชิงโต้ตอบ: ความสุข ความพึงพอใจ และการลาออกของบุคลากรพยาบาล</h1>
+    <p>มุมมองแบบ 360° สำหรับผู้บริหารการพยาบาล: วิเคราะห์ความผูกพัน ความพึงพอใจ และแนวโน้มการลาออกเพื่อกำหนดกลยุทธ์ดูแลบุคลากรเชิงรุก</p>
+  </header>
+
+  <section class="summary-grid" id="summaryCards"></section>
+
+  <section class="tabs">
+    <div class="tab-buttons" id="tabButtons"></div>
+
+    <div id="tab-analytics" class="tab-content active">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>การวิเคราะห์ความผูกพันเทียบการลาออก</h3>
+          <div id="commitmentScatter" class="chart"></div>
+          <ul class="insight-list" id="commitmentInsights"></ul>
+        </div>
+        <div class="card">
+          <h3>เมทริกซ์สหสัมพันธ์มิติความพึงพอใจ</h3>
+          <div id="correlationHeat" class="chart"></div>
+          <p>สีเข้มหมายถึงความสัมพันธ์เชิงบวกสูง ระบุว่ามิติใดขับเคลื่อนคะแนนภาพรวมได้มากที่สุด</p>
+        </div>
+        <div class="card">
+          <h3>รีเกรสชันพยากรณ์การลาออก</h3>
+          <div id="regressionSummary"></div>
+          <div class="scenario">
+            <label for="upliftSlider">จำลองการยกระดับคะแนนภาพรวมความพึงพอใจ (%)</label>
+            <input type="range" min="-5" max="15" step="1" value="0" id="upliftSlider">
+            <p id="simulationResult"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-cluster" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>การจัดกลุ่มหน่วยงานตามโปรไฟล์ความสุข (K-Means)</h3>
+          <div id="clusterChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>เรดาร์โปรไฟล์ความสุขตามคลัสเตอร์</h3>
+          <div id="clusterRadar" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>คำอธิบายเชิงกลยุทธ์</h3>
+          <ul class="insight-list" id="clusterInsights"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-eda" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>ฮีตแมปความพึงพอใจตามมิติ</h3>
+          <div id="satisfactionHeatmap" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>การวิเคราะห์ช่องว่าง: ความสุขคาดหวัง vs จริง</h3>
+          <div id="gapChart" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>หน่วยงาน Top / Bottom</h3>
+          <table id="topBottomTable"></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-strategy" class="tab-content">
+      <div class="flex-grid">
+        <div class="card">
+          <h3>Priority Matrix: Impact vs Performance</h3>
+          <div id="priorityMatrix" class="chart"></div>
+        </div>
+        <div class="card">
+          <h3>SWOT เชิงข้อมูล</h3>
+          <div class="swot-grid" id="swotGrid"></div>
+        </div>
+        <div class="card">
+          <h3>แผนที่ผู้มีส่วนร่วม (Engagement Personas)</h3>
+          <div id="personaChart" class="chart"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footnote">ที่มา: ข้อมูลสำรวจความผูกพัน ความพึงพอใจ HAPPINOMETER และอัตราการลาออก ปี 2568</p>
+
+  <script>
+    const commitmentData = [
+      { unit: 'ศูนย์หัวใจ', mean: 3.74, percent: 74.81 },
+      { unit: 'CCU&Cath Lab', mean: 3.06, percent: 61.27 },
+      { unit: 'ER', mean: 3.35, percent: 66.94 },
+      { unit: 'MICU', mean: 3.13, percent: 62.58 },
+      { unit: 'NICU', mean: 3.09, percent: 61.89 },
+      { unit: 'OPD1', mean: 3.52, percent: 70.48 },
+      { unit: 'OPD2', mean: 3.88, percent: 77.62 },
+      { unit: 'OPD3', mean: 3.65, percent: 72.98 },
+      { unit: 'OPD4', mean: 3.18, percent: 63.60 },
+      { unit: 'PICU', mean: 3.14, percent: 62.72 },
+      { unit: 'SICU', mean: 3.25, percent: 64.96 },
+      { unit: 'Chemo', mean: 3.22, percent: 64.44 },
+      { unit: 'ซักฟอก โรงนึ่ง', mean: 3.38, percent: 67.65 },
+      { unit: '18A', mean: 3.27, percent: 65.45 },
+      { unit: '18B', mean: 3.04, percent: 60.70 },
+      { unit: '18C', mean: 3.40, percent: 67.90 },
+      { unit: '18D', mean: 3.67, percent: 73.33 },
+      { unit: '19A', mean: 3.58, percent: 71.53 },
+      { unit: '19B', mean: 3.27, percent: 65.43 },
+      { unit: '19C', mean: 3.04, percent: 60.71 },
+      { unit: '19D', mean: 3.40, percent: 68.06 },
+      { unit: '20B', mean: 2.98, percent: 59.56 },
+      { unit: '21D', mean: 3.15, percent: 63.09 },
+      { unit: '22A & Stroke', mean: 2.97, percent: 59.39 },
+      { unit: '22B', mean: 3.36, percent: 67.29 },
+      { unit: '22C', mean: 3.39, percent: 67.74 },
+      { unit: '22D', mean: 3.41, percent: 68.15 },
+      { unit: '23A', mean: 3.25, percent: 65.08 },
+      { unit: '24A', mean: 3.24, percent: 64.75 },
+      { unit: '25A', mean: 3.29, percent: 65.85 },
+      { unit: '25B', mean: 3.50, percent: 70.05 },
+      { unit: '26B', mean: 3.52, percent: 70.41 },
+      { unit: 'สว่าง', mean: 3.14, percent: 62.81 },
+      { unit: 'ผู้บริหาร', mean: 4.03, percent: 80.58 },
+      { unit: 'สำนักงานฝ่ายฯ', mean: 3.53, percent: 70.60 },
+      { unit: 'Burn', mean: 3.51, percent: 70.22 },
+      { unit: 'CSSD', mean: 3.53, percent: 70.65 },
+      { unit: 'ไตเทียม', mean: 3.33, percent: 66.52 },
+      { unit: 'บริจาคโลหิต', mean: 3.40, percent: 68.06 },
+      { unit: 'ห้องคลอด', mean: 3.21, percent: 64.15 },
+      { unit: 'ห้องผ่าตัด', mean: 3.27, percent: 65.36 },
+      { unit: 'ห้องส่องกล้อง', mean: 3.46, percent: 69.21 },
+      { unit: 'หอพัก', mean: 3.67, percent: 73.33 },
+      { unit: 'ศูนย์ผู้สูงอายุ', mean: 3.40, percent: 68.03 },
+      { unit: 'ปฐมภูมิ', mean: 3.93, percent: 78.67 },
+      { unit: 'งานระบาด', mean: 4.67, percent: 93.33 },
+      { unit: 'อาชีวอนามัย', mean: 3.83, percent: 76.67 }
+    ];
+    const satisfactionData = [
+      { unit: 'OPD1', overall: 75.40, command: 74.60, job: 79.40, progress: 71.40, env: 75.80, relation: 81.60, compensation: 71.40 },
+      { unit: 'OPD2', overall: 78.80, command: 78.80, job: 83.60, progress: 74.80, env: 80.80, relation: 83.40, compensation: 73.00 },
+      { unit: 'OPD3', overall: 80.20, command: 79.40, job: 84.60, progress: 78.00, env: 79.60, relation: 83.00, compensation: 76.80 },
+      { unit: 'OPD4', overall: 72.40, command: 80.20, job: 83.80, progress: 82.20, env: 79.60, relation: 85.80, compensation: 73.60 },
+      { unit: 'ER', overall: 74.00, command: 74.00, job: 79.20, progress: 72.40, env: 77.00, relation: 74.60, compensation: 68.20 },
+      { unit: 'OR', overall: 74.60, command: 73.80, job: 77.20, progress: 70.40, env: 76.40, relation: 77.80, compensation: 71.20 },
+      { unit: 'ไตเทียม', overall: 74.80, command: 75.20, job: 68.80, progress: 70.40, env: 79.20, relation: 80.80, compensation: 66.80 },
+      { unit: 'ห้องคลอด', overall: 75.60, command: 73.80, job: 80.40, progress: 75.00, env: 73.60, relation: 79.40, compensation: 71.40 },
+      { unit: 'NICU', overall: 75.80, command: 72.80, job: 80.00, progress: 76.40, env: 77.80, relation: 79.80, compensation: 70.00 },
+      { unit: 'MICU', overall: 78.40, command: 79.80, job: 84.00, progress: 73.40, env: 77.60, relation: 84.00, compensation: 72.00 },
+      { unit: 'SICU', overall: 72.40, command: 70.20, job: 78.40, progress: 67.80, env: 68.80, relation: 78.60, compensation: 70.80 },
+      { unit: '18A', overall: 77.40, command: 76.40, job: 80.60, progress: 75.80, env: 79.60, relation: 79.00, compensation: 74.00 },
+      { unit: '18B', overall: 74.00, command: 71.80, job: 79.20, progress: 71.60, env: 77.00, relation: 74.40, compensation: 71.20 },
+      { unit: '18D', overall: 72.60, command: 70.20, job: 77.80, progress: 72.40, env: 74.60, relation: 74.80, compensation: 67.00 },
+      { unit: '19B', overall: 77.80, command: 78.40, job: 81.80, progress: 76.00, env: 78.60, relation: 80.60, compensation: 72.40 },
+      { unit: '19D', overall: 77.00, command: 75.40, job: 81.20, progress: 75.80, env: 78.60, relation: 81.60, compensation: 71.20 },
+      { unit: '21D', overall: 75.60, command: 74.40, job: 78.60, progress: 74.00, env: 78.40, relation: 79.20, compensation: 70.20 },
+      { unit: '22A', overall: 77.80, command: 76.60, job: 82.20, progress: 76.40, env: 75.60, relation: 81.20, compensation: 75.00 },
+      { unit: '22B', overall: 78.20, command: 75.20, job: 80.00, progress: 76.20, env: 82.20, relation: 85.40, compensation: 73.20 },
+      { unit: '22C', overall: 75.00, command: 73.80, job: 78.20, progress: 74.20, env: 72.00, relation: 79.80, compensation: 72.80 },
+      { unit: '23A', overall: 78.40, command: 75.80, job: 81.60, progress: 74.40, env: 81.20, relation: 81.40, compensation: 71.20 },
+      { unit: '24A', overall: 77.60, command: 76.20, job: 82.20, progress: 77.00, env: 77.80, relation: 81.60, compensation: 71.40 },
+      { unit: '25A', overall: 75.40, command: 75.80, job: 77.20, progress: 74.40, env: 82.20, relation: 79.00, compensation: 67.00 },
+      { unit: '25B', overall: 78.40, command: 77.80, job: 84.20, progress: 75.40, env: 82.00, relation: 81.40, compensation: 71.20 },
+      { unit: '26B', overall: 80.40, command: 81.20, job: 83.80, progress: 79.20, env: 79.80, relation: 83.40, compensation: 75.20 },
+      { unit: 'สว่างฯ', overall: 74.60, command: 72.40, job: 81.00, progress: 74.40, env: 72.40, relation: 78.40, compensation: 69.00 },
+      { unit: 'บริจาคโลหิต', overall: 79.00, command: 80.40, job: 85.00, progress: 69.60, env: 84.00, relation: 82.20, compensation: 74.00 },
+      { unit: 'สำนักงาน', overall: 87.20, command: 87.60, job: 87.60, progress: 86.60, env: 90.00, relation: 86.00, compensation: 85.80 },
+      { unit: 'ศูนย์บริการฯ', overall: 77.40, command: 80.00, job: 81.20, progress: 71.00, env: 76.60, relation: 82.80, compensation: 73.00 },
+      { unit: 'ศูนย์บางพระ', overall: 83.20, command: 84.60, job: 87.60, progress: 82.60, env: 83.60, relation: 81.20, compensation: 79.00 },
+      { unit: 'ส่องกล้อง', overall: 73.40, command: 71.80, job: 79.60, progress: 70.40, env: 73.20, relation: 76.80, compensation: 69.60 },
+      { unit: 'ชุมชน', overall: 78.60, command: 77.20, job: 82.00, progress: 74.80, env: 84.00, relation: 83.40, compensation: 72.20 },
+      { unit: 'BU', overall: 78.80, command: 78.00, job: 85.80, progress: 73.40, env: 77.40, relation: 83.60, compensation: 74.60 },
+      { unit: 'CCU', overall: 78.60, command: 79.20, job: 79.20, progress: 77.20, env: 79.60, relation: 84.80, compensation: 73.60 },
+      { unit: 'CSSD', overall: 83.20, command: 85.60, job: 84.80, progress: 80.60, env: 86.20, relation: 82.20, compensation: 80.60 },
+      { unit: 'PICU', overall: 81.00, command: 83.40, job: 87.00, progress: 74.00, env: 78.60, relation: 92.80, compensation: 71.60 }
+    ];
+    const happinessData = [
+      { unit: 'ปฐมภูมิ', overallHappy: 80.00, dims: [72.00,72.80,81.78,81.60,74.67,78.00,84.00,60.00,79.00,78.67,82.40] },
+      { unit: 'งานระบาด', overallHappy: 70.00, dims: [78.00,54.00,80.00,98.00,70.00,80.00,73.33,82.50,73.75,93.33,66.00] },
+      { unit: 'อาชีวอนามัย', overallHappy: 70.00, dims: [84.00,58.00,77.78,72.00,80.00,80.00,70.00,67.50,70.00,76.67,76.00] },
+      { unit: 'ศูนย์หัวใจ', overallHappy: 70.00, dims: [85.33,70.67,76.30,74.67,64.44,78.89,75.56,80.00,76.67,74.81,77.33] },
+      { unit: 'CCU&Cath Lab', overallHappy: 54.29, dims: [63.43,58.86,71.43,76.00,64.76,69.05,76.19,67.86,64.82,61.27,48.00] },
+      { unit: 'ER', overallHappy: 68.48, dims: [67.03,58.42,72.19,72.00,58.79,70.51,70.91,62.88,67.99,66.94,59.88] },
+      { unit: 'MICU', overallHappy: 61.08, dims: [64.54,54.27,70.69,71.89,52.79,66.31,68.83,60.41,66.28,62.58,55.24] },
+      { unit: 'NICU', overallHappy: 59.70, dims: [65.33,53.09,74.07,69.58,51.92,66.77,69.70,67.27,65.68,61.89,53.33] },
+      { unit: 'OPD1', overallHappy: 68.57, dims: [71.29,62.71,77.94,77.00,75.95,67.14,66.19,60.18,68.57,70.48,65.71] },
+      { unit: 'OPD2', overallHappy: 84.29, dims: [73.14,68.29,82.70,82.57,82.86,77.62,74.29,63.93,78.93,77.62,70.57] },
+      { unit: 'OPD3', overallHappy: 74.21, dims: [74.32,67.37,77.78,77.89,65.26,68.42,68.42,64.21,69.87,72.98,70.32] },
+      { unit: 'OPD4', overallHappy: 60.34, dims: [74.62,60.00,68.05,69.10,69.89,67.93,64.37,61.72,62.50,63.60,61.79] },
+      { unit: 'PICU', overallHappy: 48.89, dims: [58.67,52.89,83.21,74.67,48.15,62.96,77.04,60.56,69.17,62.72,63.56] },
+      { unit: 'SICU', overallHappy: 65.00, dims: [66.31,56.92,75.81,74.31,56.15,67.18,72.82,63.65,68.85,64.96,60.00] },
+      { unit: 'Chemo', overallHappy: 60.00, dims: [69.33,54.67,68.15,61.33,64.44,66.67,57.78,56.67,66.25,64.44,58.67] },
+      { unit: 'ซักฟอก โรงนึ่ง', overallHappy: 64.44, dims: [57.33,52.00,73.33,72.00,63.70,66.67,72.59,46.11,69.03,67.65,57.78] },
+      { unit: '18A', overallHappy: 59.55, dims: [66.00,56.18,74.95,77.27,57.58,60.61,70.91,59.32,67.95,65.45,54.91] },
+      { unit: '18B', overallHappy: 54.74, dims: [64.63,55.79,67.72,70.53,64.91,66.14,70.18,58.68,61.71,60.70,57.26] },
+      { unit: '18C', overallHappy: 68.89, dims: [64.44,60.00,81.23,80.00,71.85,70.37,77.04,59.44,70.97,67.90,72.44] },
+      { unit: '18D', overallHappy: 80.00, dims: [76.00,72.00,73.33,72.00,80.00,63.33,73.33,65.00,62.50,73.33,48.00] },
+      { unit: '19A', overallHappy: 70.94, dims: [66.63,59.88,76.53,76.00,60.42,69.69,71.67,58.91,71.68,71.53,58.88] },
+      { unit: '19B', overallHappy: 64.07, dims: [66.07,57.78,76.38,72.44,56.79,66.54,73.83,60.00,69.12,65.43,59.26] },
+      { unit: '19C', overallHappy: 53.93, dims: [62.57,50.86,77.14,75.00,54.76,62.98,68.33,59.11,64.46,60.71,55.29] },
+      { unit: '19D', overallHappy: 68.44, dims: [65.50,58.13,76.74,74.63,66.88,70.52,70.21,56.25,71.80,68.06,65.50] },
+      { unit: '20B', overallHappy: 57.00, dims: [62.40,48.80,68.00,62.80,49.33,64.33,63.33,57.50,66.50,59.56,51.60] },
+      { unit: '21D', overallHappy: 67.78, dims: [66.89,57.33,73.21,72.44,63.70,66.48,71.11,64.17,69.86,63.09,60.89] },
+      { unit: '22A & Stroke', overallHappy: 71.82, dims: [63.64,55.27,77.98,78.73,56.36,64.85,68.48,54.09,60.34,59.39,51.27] },
+      { unit: '22B', overallHappy: 72.80, dims: [66.56,56.00,74.76,71.20,57.87,64.80,65.07,61.00,71.15,67.29,60.16] },
+      { unit: '22C', overallHappy: 67.41, dims: [65.33,57.93,75.06,72.15,57.28,64.69,72.35,58.33,71.39,67.74,56.00] },
+      { unit: '22D', overallHappy: 64.76, dims: [64.00,56.19,78.52,71.62,54.92,70.48,69.52,56.67,70.24,68.15,53.71] },
+      { unit: '23A', overallHappy: 66.19, dims: [65.52,56.19,72.80,73.52,61.59,68.89,69.84,62.86,67.68,65.08,56.00] },
+      { unit: '24A', overallHappy: 68.64, dims: [62.73,60.73,75.56,71.64,62.73,68.94,68.79,64.77,66.65,64.75,56.36] },
+      { unit: '25A', overallHappy: 68.95, dims: [69.47,54.74,75.44,77.26,56.84,66.14,69.82,61.84,65.13,65.85,58.74] },
+      { unit: '25B', overallHappy: 61.40, dims: [62.48,50.29,77.57,77.51,54.92,69.52,75.24,60.95,70.48,70.05,57.71] },
+      { unit: '26B', overallHappy: 65.37, dims: [63.61,55.02,79.30,78.73,57.72,69.84,73.01,59.15,71.68,70.41,59.61] },
+      { unit: 'สว่าง', overallHappy: 60.67, dims: [64.00,52.27,76.15,73.33,52.89,64.00,72.44,56.67,62.50,62.81,54.13] },
+      { unit: 'ผู้บริหาร', overallHappy: 75.43, dims: [74.17,65.30,79.81,77.91,73.04,72.83,76.67,73.15,77.39,80.58,68.00] },
+      { unit: 'สำนักงานฝ่ายฯ', overallHappy: 71.54, dims: [75.69,60.62,79.32,80.31,74.87,68.72,70.26,60.77,65.29,70.60,65.85] },
+      { unit: 'Burn', overallHappy: 70.00, dims: [68.40,59.20,76.44,76.80,68.00,67.33,70.67,62.50,72.13,70.22,64.00] },
+      { unit: 'CSSD', overallHappy: 81.25, dims: [67.50,61.00,76.67,76.67,69.44,69.03,75.00,59.38,72.92,70.65,56.67] },
+      { unit: 'ไตเทียม', overallHappy: 68.67, dims: [72.53,60.80,72.74,74.40,63.11,68.00,67.56,66.00,67.50,66.52,57.33] },
+      { unit: 'บริจาคโลหิต', overallHappy: 75.00, dims: [67.00,64.50,75.83,74.50,79.17,75.00,68.33,68.13,72.66,68.06,78.00] },
+      { unit: 'ห้องคลอด', overallHappy: 60.87, dims: [65.91,55.83,73.33,73.22,53.04,65.94,69.57,56.96,70.05,64.15,56.17] },
+      { unit: 'ห้องผ่าตัด', overallHappy: 68.43, dims: [69.10,59.84,73.99,73.10,63.14,66.01,74.51,60.49,67.67,65.36,59.29] },
+      { unit: 'ห้องส่องกล้อง', overallHappy: 65.71, dims: [69.14,57.14,74.29,76.57,63.81,63.81,67.62,58.57,64.46,69.21,68.00] },
+      { unit: 'หอพัก', overallHappy: 90.00, dims: [72.00,54.00,77.78,76.00,66.67,66.67,63.33,45.00,78.75,73.33,64.00] },
+      { unit: 'ศูนย์ผู้สูงอายุ', overallHappy: 60.00, dims: [65.54,57.23,73.33,78.15,68.21,71.28,68.21,61.92,70.58,68.03,67.08] }
+    ];
+    const resignationData = [
+      { unit: 'OPD1', total: 2 },
+      { unit: 'OPD3', total: 1 },
+      { unit: 'OPD4', total: 1 },
+      { unit: 'ER', total: 1 },
+      { unit: 'MICU', total: 3 },
+      { unit: 'SICU', total: 2 },
+      { unit: 'NICU', total: 4 },
+      { unit: 'CCU', total: 2 },
+      { unit: 'OR', total: 6 },
+      { unit: 'DR', total: 3 },
+      { unit: 'ไตเทียม', total: 1 },
+      { unit: '18B', total: 1 },
+      { unit: '18D', total: 3 },
+      { unit: '19A', total: 2 },
+      { unit: '19C', total: 1 },
+      { unit: '19D', total: 2 },
+      { unit: '20C', total: 1 },
+      { unit: '22A', total: 2 },
+      { unit: '23A', total: 2 },
+      { unit: '25A', total: 1 },
+      { unit: '25B', total: 1 },
+      { unit: 'CSSD', total: 2 },
+      { unit: 'บางพระ', total: 3 },
+      { unit: 'Refer', total: 2 },
+      { unit: '30 บาท', total: 1 },
+      { unit: 'IC', total: 1 },
+      { unit: 'สำนักงาน', total: 1 },
+      { unit: 'หน.หอฯ/ผตก', total: 1 }
+    ];
+
+    const tabs = [
+      { id: 'tab-analytics', label: 'วิเคราะห์เชิงสัมพันธ์ & การพยากรณ์' },
+      { id: 'tab-cluster', label: 'การจัดกลุ่มโปรไฟล์ความสุข' },
+      { id: 'tab-eda', label: 'การสำรวจข้อมูล (EDA)' },
+      { id: 'tab-strategy', label: 'กลยุทธ์ & ข้อเสนอแนะ' }
+    ];
+    const tabButtons = document.getElementById('tabButtons');
+    tabs.forEach((tab, idx) => {
+      const btn = document.createElement('button');
+      btn.textContent = tab.label;
+      btn.classList.toggle('active', idx === 0);
+      btn.addEventListener('click', () => switchTab(tab.id, btn));
+      tabButtons.appendChild(btn);
+    });
+
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab-buttons button').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function summarize() {
+      const avgCommit = commitmentData.reduce((sum, d) => sum + d.percent, 0) / commitmentData.length;
+      const avgSatis = satisfactionData.reduce((sum, d) => sum + d.overall, 0) / satisfactionData.length;
+      const avgHappy = happinessData.reduce((sum, d) => sum + d.overallHappy, 0) / happinessData.length;
+      const totalResign = resignationData.reduce((sum, d) => sum + d.total, 0);
+
+      const cards = [
+        { title: 'ความผูกพันเฉลี่ย', value: avgCommit.toFixed(1) + '%', detail: 'คะแนนความผูกพันโดยรวมของหน่วยพยาบาลทั้งหมด' },
+        { title: 'ความพึงพอใจเฉลี่ย', value: avgSatis.toFixed(1) + '%', detail: 'ค่าเฉลี่ยทุกมิติจากแบบสำรวจ Job Satisfaction' },
+        { title: 'ความสุขเฉลี่ย (Happinometer)', value: avgHappy.toFixed(1) + '%', detail: 'คะแนนเฉลี่ย 11 มิติความสุขและ Engagement' },
+        { title: 'จำนวนลาออกรวม', value: totalResign + ' คน', detail: 'การลาออกตลอดปี 2568 แยกตามตำแหน่ง' }
+      ];
+
+      const container = document.getElementById('summaryCards');
+      cards.forEach(card => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `<h3>${card.title}</h3><div class="value">${card.value}</div><p>${card.detail}</p>`;
+        container.appendChild(div);
+      });
+    }
+    function mapResignations(unit) {
+      const direct = resignationData.find(d => normalizeName(d.unit) === normalizeName(unit));
+      if (direct) return direct.total;
+      const alt = resignationData.find(d => normalizeName(d.unit).includes(normalizeName(unit)));
+      return alt ? alt.total : 0;
+    }
+
+    function renderCommitmentScatter() {
+      const merged = commitmentData.map(d => ({
+        ...d,
+        resign: mapResignations(d.unit)
+      }));
+
+      const trace = {
+        x: merged.map(d => d.percent),
+        y: merged.map(d => d.resign),
+        text: merged.map(d => `${d.unit}<br>ลาออก: ${d.resign} คน`),
+        mode: 'markers',
+        marker: {
+          size: merged.map(d => 12 + d.resign * 3),
+          color: merged.map(d => d.resign),
+          colorscale: 'Portland',
+          showscale: true,
+          colorbar: { title: 'จำนวนลาออก' }
+        },
+        type: 'scatter'
+      };
+
+      const layout = {
+        xaxis: { title: 'คะแนนความผูกพัน (%)', color: varText() },
+        yaxis: { title: 'จำนวนลาออก', color: varText() },
+        margin: { t: 20, r: 20, b: 60, l: 60 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      };
+
+      Plotly.newPlot('commitmentScatter', [trace], layout, { responsive: true });
+
+      const corr = correlation(merged.map(d => d.percent), merged.map(d => d.resign));
+      const meanResign = merged.reduce((s, d) => s + d.resign, 0) / merged.length;
+      const highRisk = merged.filter(d => d.percent < avg(merged.map(m => m.percent)) && d.resign >= meanResign);
+      const insights = [
+        `สัมประสิทธิ์สหสัมพันธ์ (r) ระหว่างความผูกพันและลาออก = ${corr.toFixed(2)} (ทิศทาง ${corr < 0 ? 'ผกผัน' : 'สอดคล้อง'})`,
+        `หน่วยที่ควรจับตา: ${highRisk.map(h => h.unit).join(', ') || 'ไม่พบ'} เนื่องจากความผูกพันต่ำและลาออกสูง`,
+        `ค่าเฉลี่ยการลาออกของกลุ่มข้อมูล = ${meanResign.toFixed(1)} คน`
+      ];
+      const list = document.getElementById('commitmentInsights');
+      insights.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        list.appendChild(li);
+      });
+    }
+
+    function correlation(arrX, arrY) {
+      const n = arrX.length;
+      const meanX = avg(arrX);
+      const meanY = avg(arrY);
+      let num = 0, denX = 0, denY = 0;
+      for (let i = 0; i < n; i++) {
+        const dx = arrX[i] - meanX;
+        const dy = arrY[i] - meanY;
+        num += dx * dy;
+        denX += dx * dx;
+        denY += dy * dy;
+      }
+      return num / Math.sqrt(denX * denY);
+    }
+
+    function avg(arr) {
+      return arr.reduce((s, v) => s + v, 0) / arr.length;
+    }
+    function renderCorrelationHeat() {
+      const dims = ['การบังคับบัญชา','ลักษณะงาน','ความก้าวหน้า','สิ่งแวดล้อม','เพื่อนร่วมงาน','ค่าตอบแทน','ภาพรวม'];
+      const matrix = dims.map(() => Array(dims.length).fill(0));
+      const data = satisfactionData.map(d => [d.command,d.job,d.progress,d.env,d.relation,d.compensation,d.overall]);
+      for (let i = 0; i < dims.length; i++) {
+        for (let j = 0; j < dims.length; j++) {
+          const xi = data.map(row => row[i]);
+          const yj = data.map(row => row[j]);
+          matrix[i][j] = correlation(xi, yj);
+        }
+      }
+      const trace = {
+        z: matrix,
+        x: dims,
+        y: dims,
+        type: 'heatmap',
+        colorscale: 'Tealrose',
+        zmin: -1,
+        zmax: 1,
+        colorbar: { title: 'r', tickformat: '.2f' }
+      };
+      const layout = {
+        margin: { t: 20, l: 120 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      };
+      Plotly.newPlot('correlationHeat', [trace], layout, { responsive: true });
+    }
+
+    function linearRegression(X, y) {
+      const Xt = transpose(X);
+      const XtX = multiply(Xt, X);
+      const XtXInv = inverse(XtX);
+      const XtY = multiply(Xt, y);
+      const beta = multiply(XtXInv, XtY);
+      return beta;
+    }
+
+    function transpose(m) {
+      return m[0].map((_, i) => m.map(row => row[i]));
+    }
+
+    function multiply(a, b) {
+      if (Array.isArray(b[0])) {
+        return a.map(row => b[0].map((_, j) => row.reduce((sum, _, i) => sum + row[i] * b[i][j], 0)));
+      } else {
+        return a.map(row => row.reduce((sum, _, i) => sum + row[i] * b[i], 0));
+      }
+    }
+
+    function inverse(matrix) {
+      const n = matrix.length;
+      const augmented = matrix.map((row, i) => [...row, ...Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))]);
+      for (let i = 0; i < n; i++) {
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) maxRow = k;
+        }
+        [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+        const pivot = augmented[i][i];
+        for (let j = 0; j < 2 * n; j++) augmented[i][j] /= pivot;
+        for (let k = 0; k < n; k++) {
+          if (k === i) continue;
+          const factor = augmented[k][i];
+          for (let j = 0; j < 2 * n; j++) augmented[k][j] -= factor * augmented[i][j];
+        }
+      }
+      return augmented.map(row => row.slice(n));
+    }
+    function renderRegression() {
+      const merged = commitmentData.map(d => {
+        const satis = satisfactionData.find(s => normalizeName(s.unit) === normalizeName(d.unit));
+        const happy = happinessData.find(h => normalizeName(h.unit) === normalizeName(d.unit));
+        return satis && happy ? {
+          unit: d.unit,
+          commit: d.percent,
+          satisfaction: satis.overall,
+          happiness: happy.overallHappy,
+          resign: mapResignations(d.unit)
+        } : null;
+      }).filter(Boolean);
+
+      const X = merged.map(d => [1, d.commit, d.satisfaction, d.happiness]);
+      const y = merged.map(d => d.resign);
+      const beta = linearRegression(X, y);
+
+      const coef = {
+        intercept: beta[0].toFixed(3),
+        commit: beta[1].toFixed(3),
+        satisfaction: beta[2].toFixed(3),
+        happiness: beta[3].toFixed(3)
+      };
+
+      const predicted = merged.map((d, idx) => ({ unit: d.unit, actual: y[idx], pred: X[idx].reduce((sum, val, i) => sum + val * beta[i], 0) }));
+      const rmse = Math.sqrt(avg(predicted.map(d => Math.pow(d.actual - d.pred, 2)))).toFixed(2);
+
+      const container = document.getElementById('regressionSummary');
+      container.innerHTML = `
+        <p>โมเดล: ลาออก = ${coef.intercept} + (${coef.commit})×Commitment + (${coef.satisfaction})×Satisfaction + (${coef.happiness})×Happiness</p>
+        <p>ค่า RMSE = ${rmse} คน</p>
+        <p>หน่วยที่คาดการณ์ลาออกสูงสุด: ${predicted.sort((a,b)=>b.pred - a.pred)[0].unit}</p>
+      `;
+
+      const slider = document.getElementById('upliftSlider');
+      const result = document.getElementById('simulationResult');
+      const baseTotal = predicted.reduce((sum, d) => sum + d.pred, 0);
+      const updateSimulation = () => {
+        const uplift = Number(slider.value);
+        const adjPred = merged.map(d => {
+          const newSatis = d.satisfaction * (1 + uplift / 100);
+          const features = [1, d.commit, newSatis, d.happiness];
+          return features.reduce((sum, val, i) => sum + val * beta[i], 0);
+        });
+        const adjTotal = adjPred.reduce((s, v) => s + v, 0);
+        const diff = baseTotal - adjTotal;
+        result.textContent = `ยกระดับคะแนนภาพรวมความพึงพอใจ ${uplift}% สามารถลดลาออกรวมโดยประมาณ ${diff.toFixed(1)} คน (จาก ${baseTotal.toFixed(1)} เหลือ ${adjTotal.toFixed(1)} คน)`;
+      };
+      slider.addEventListener('input', updateSimulation);
+      updateSimulation();
+    }
+
+    function normalizeName(name) {
+      return name.replace(/\s|&|ฯ|\./g, '').toLowerCase();
+    }
+    function renderCluster() {
+      const data = happinessData.map(d => ({ unit: d.unit, vector: d.dims }));
+      const clusters = kMeans(data.map(d => d.vector), 3);
+      const assignments = clusters.assignments;
+      const centroids = clusters.centroids;
+
+      const points = data.map((d, idx) => ({ unit: d.unit, cluster: assignments[idx], vector: d.vector }));
+      const colors = ['#2463eb', '#ff6b6b', '#f4a261'];
+
+      const scatterData = centroids.map((centroid, clusterIndex) => {
+        const clusterPoints = points.filter(p => p.cluster === clusterIndex);
+        return {
+          x: clusterPoints.map(p => p.vector[0]),
+          y: clusterPoints.map(p => p.vector[2]),
+          text: clusterPoints.map(p => `${p.unit}`),
+          mode: 'markers',
+          marker: {
+            size: 12,
+            color: colors[clusterIndex],
+            line: { color: '#ffffff', width: 1 }
+          },
+          name: `คลัสเตอร์ ${clusterIndex + 1}`
+        };
+      });
+
+      const layout = {
+        xaxis: { title: 'มิติร่างกาย (Body)', color: varText() },
+        yaxis: { title: 'มิติหัวใจ (Heart)', color: varText() },
+        margin: { t: 30 },
+        legend: { orientation: 'h' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      };
+
+      Plotly.newPlot('clusterChart', scatterData, layout, { responsive: true });
+
+      const labels = ['Body','Relax','Heart','Soul','Family','Society','Brain','Money','Happy+','Engagement','Work-Life'];
+      const radarTraces = centroids.map((centroid, idx) => ({
+        type: 'scatterpolar',
+        r: centroid,
+        theta: labels,
+        fill: 'toself',
+        name: `คลัสเตอร์ ${idx + 1}`,
+        marker: { color: colors[idx] }
+      }));
+
+      Plotly.newPlot('clusterRadar', radarTraces, {
+        polar: { radialaxis: { visible: true, range: [45, 100], color: varText() }, angularaxis: { color: varText() } },
+        legend: { orientation: 'h' },
+        margin: { t: 40 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      }, { responsive: true });
+
+      const clusterInsights = document.getElementById('clusterInsights');
+      clusterInsights.innerHTML = '';
+      const summaries = centroids.map((c, idx) => {
+        const clusterUnits = points.filter(p => p.cluster === idx).map(p => p.unit).join(', ');
+        const maxIdx = c.indexOf(Math.max(...c));
+        const minIdx = c.indexOf(Math.min(...c));
+        return `คลัสเตอร์ ${idx + 1}: จุดแข็งสูงสุดคือมิติ ${labels[maxIdx]} และมิติที่ต้องเร่งด่วนคือ ${labels[minIdx]} (หน่วย: ${clusterUnits})`;
+      });
+      summaries.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        clusterInsights.appendChild(li);
+      });
+    }
+
+    function kMeans(data, k, maxIter = 100) {
+      const centroids = data.slice(0, k).map(vec => vec.slice());
+      let assignments = Array(data.length).fill(0);
+      for (let iter = 0; iter < maxIter; iter++) {
+        let changed = false;
+        for (let i = 0; i < data.length; i++) {
+          const distances = centroids.map(c => euclidean(data[i], c));
+          const cluster = distances.indexOf(Math.min(...distances));
+          if (assignments[i] !== cluster) {
+            assignments[i] = cluster;
+            changed = true;
+          }
+        }
+        if (!changed) break;
+        for (let c = 0; c < k; c++) {
+          const members = data.filter((_, idx) => assignments[idx] === c);
+          if (members.length === 0) continue;
+          centroids[c] = Array(data[0].length).fill(0).map((_, dim) => avg(members.map(m => m[dim])));
+        }
+      }
+      return { assignments, centroids };
+    }
+
+    function euclidean(a, b) {
+      return Math.sqrt(a.reduce((sum, val, idx) => sum + Math.pow(val - b[idx], 2), 0));
+    }
+    function renderSatisfactionHeatmap() {
+      const units = satisfactionData.map(d => d.unit);
+      const dims = ['การบังคับบัญชา','ลักษณะงาน','ความก้าวหน้า','สิ่งแวดล้อม','เพื่อนร่วมงาน','ค่าตอบแทน','ภาพรวม'];
+      const z = satisfactionData.map(d => [d.command,d.job,d.progress,d.env,d.relation,d.compensation,d.overall]);
+      Plotly.newPlot('satisfactionHeatmap', [{
+        z,
+        x: dims,
+        y: units,
+        type: 'heatmap',
+        colorscale: 'Rainbow'
+      }], {
+        margin: { t: 30, l: 150 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      }, { responsive: true });
+    }
+
+    function renderGapAnalysis() {
+      const benchmark = 75;
+      const diffs = happinessData.map(d => ({ unit: d.unit, diff: d.overallHappy - benchmark }));
+      const sorted = diffs.sort((a, b) => a.diff - b.diff);
+      const low = sorted.slice(0, 5);
+      const high = sorted.slice(-5);
+      const combined = [...low, ...high];
+      const trace = {
+        x: combined.map(d => d.unit),
+        y: combined.map(d => d.diff),
+        marker: { color: combined.map(d => d.diff < 0 ? '#ff6b6b' : '#38b000') },
+        type: 'bar'
+      };
+      Plotly.newPlot('gapChart', [trace], {
+        title: { text: 'หน่วยที่เบี่ยงเบนจาก Benchmark 75%', font: { color: varText() } },
+        xaxis: { color: varText() },
+        yaxis: { title: 'ส่วนต่างคะแนน', color: varText() },
+        margin: { t: 60, b: 120 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      }, { responsive: true });
+    }
+
+    function renderTopBottom() {
+      const topCommit = [...commitmentData].sort((a,b)=>b.percent - a.percent).slice(0,5);
+      const bottomCommit = [...commitmentData].sort((a,b)=>a.percent - b.percent).slice(0,5);
+      const topHappy = [...happinessData].sort((a,b)=>b.overallHappy - a.overallHappy).slice(0,5);
+      const bottomHappy = [...happinessData].sort((a,b)=>a.overallHappy - b.overallHappy).slice(0,5);
+      const topSatis = [...satisfactionData].sort((a,b)=>b.overall - a.overall).slice(0,5);
+      const bottomSatis = [...satisfactionData].sort((a,b)=>a.overall - b.overall).slice(0,5);
+
+      const table = document.getElementById('topBottomTable');
+      table.innerHTML = `
+        <tr><th>ตัวชี้วัด</th><th>Top 5</th><th>Bottom 5</th></tr>
+        <tr><td>ความผูกพัน</td><td>${topCommit.map(d=>d.unit + ' (' + d.percent.toFixed(1) + '%)').join('<br>')}</td><td>${bottomCommit.map(d=>d.unit + ' (' + d.percent.toFixed(1) + '%)').join('<br>')}</td></tr>
+        <tr><td>ความพึงพอใจ</td><td>${topSatis.map(d=>d.unit + ' (' + d.overall.toFixed(1) + '%)').join('<br>')}</td><td>${bottomSatis.map(d=>d.unit + ' (' + d.overall.toFixed(1) + '%)').join('<br>')}</td></tr>
+        <tr><td>ความสุข</td><td>${topHappy.map(d=>d.unit + ' (' + d.overallHappy.toFixed(1) + '%)').join('<br>')}</td><td>${bottomHappy.map(d=>d.unit + ' (' + d.overallHappy.toFixed(1) + '%)').join('<br>')}</td></tr>
+      `;
+    }
+    function renderPriorityMatrix() {
+      const units = satisfactionData.map(d => {
+        const happy = happinessData.find(h => normalizeName(h.unit) === normalizeName(d.unit));
+        return happy ? {
+          unit: d.unit,
+          performance: d.overall,
+          impact: happy.dims[8],
+          resign: mapResignations(d.unit)
+        } : null;
+      }).filter(Boolean);
+
+      const trace = {
+        x: units.map(u => u.performance),
+        y: units.map(u => u.impact),
+        text: units.map(u => `${u.unit}<br>ลาออก: ${u.resign}`),
+        mode: 'markers',
+        marker: {
+          size: units.map(u => 12 + (u.resign || 0) * 4),
+          color: units.map(u => (u.resign || 0)),
+          colorscale: 'Turbo',
+          showscale: true,
+          colorbar: { title: 'ลาออก' }
+        }
+      };
+
+      Plotly.newPlot('priorityMatrix', [trace], {
+        xaxis: { title: 'ศักยภาพ (Overall Satisfaction)', color: varText(), zeroline: false },
+        yaxis: { title: 'อิมแพ็กต์ต่อความสุข (Happy Plus)', color: varText(), zeroline: false },
+        shapes: [
+          { type: 'line', x0: 75, x1: 75, y0: 40, y1: 100, line: { dash: 'dot', color: '#2463eb' } },
+          { type: 'line', x0: 40, x1: 100, y0: 70, y1: 70, line: { dash: 'dot', color: '#ff6b6b' } }
+        ],
+        annotations: [
+          { x: 82, y: 85, text: 'ดาวรุ่ง', showarrow: false, font: { color: '#2463eb' } },
+          { x: 62, y: 85, text: 'สร้างประสบการณ์', showarrow: false, font: { color: '#2463eb' } },
+          { x: 60, y: 55, text: 'โฟกัสเร่งด่วน', showarrow: false, font: { color: '#ff6b6b' } },
+          { x: 82, y: 55, text: 'รักษามาตรฐาน', showarrow: false, font: { color: '#38b000' } }
+        ],
+        margin: { t: 30 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      }, { responsive: true });
+    }
+
+    function renderSWOT() {
+      const strengths = happinessData.filter(d => d.overallHappy >= 80).map(d => d.unit).slice(0,5);
+      const weaknesses = happinessData.filter(d => d.overallHappy < 60).map(d => d.unit).slice(0,5);
+      const opportunities = satisfactionData.filter(d => d.overall > 80 && mapResignations(d.unit) > 0).map(d => d.unit);
+      const threats = resignationData.filter(d => d.total >= 3).map(d => d.unit);
+      const swot = [
+        { title: 'Strengths', items: strengths, color: '#38b000' },
+        { title: 'Weaknesses', items: weaknesses, color: '#ff6b6b' },
+        { title: 'Opportunities', items: opportunities, color: '#2463eb' },
+        { title: 'Threats', items: threats, color: '#f4a261' }
+      ];
+      const grid = document.getElementById('swotGrid');
+      grid.innerHTML = '';
+      swot.forEach(section => {
+        const div = document.createElement('div');
+        div.className = 'swot-card';
+        div.innerHTML = `<h4 style="color:${section.color}">${section.title}</h4><p>${(section.items && section.items.length ? section.items.join(', ') : 'ไม่มีข้อมูลเด่น')}</p>`;
+        grid.appendChild(div);
+      });
+    }
+
+    function renderPersona() {
+      const personas = commitmentData.map(c => {
+        const happy = happinessData.find(h => normalizeName(h.unit) === normalizeName(c.unit));
+        const satis = satisfactionData.find(s => normalizeName(s.unit) === normalizeName(c.unit));
+        return happy && satis ? {
+          unit: c.unit,
+          commit: c.percent,
+          happy: happy.overallHappy,
+          satisfaction: satis.overall
+        } : null;
+      }).filter(Boolean);
+
+      const trace = {
+        x: personas.map(p => p.commit),
+        y: personas.map(p => p.happy),
+        text: personas.map(p => `${p.unit}<br>พึงพอใจ: ${p.satisfaction.toFixed(1)}%`),
+        mode: 'markers',
+        marker: {
+          size: personas.map(p => 10 + (p.satisfaction - 60) / 2),
+          color: personas.map(p => p.satisfaction),
+          colorscale: 'Picnic',
+          showscale: true,
+          colorbar: { title: 'ความพึงพอใจ' }
+        }
+      };
+
+      Plotly.newPlot('personaChart', [trace], {
+        xaxis: { title: 'Commitment %', color: varText() },
+        yaxis: { title: 'Overall Happiness %', color: varText() },
+        shapes: [
+          { type: 'line', x0: 70, x1: 70, y0: 40, y1: 100, line: { dash: 'dot', color: '#ff6b6b' } },
+          { type: 'line', x0: 40, x1: 100, y0: 70, y1: 70, line: { dash: 'dot', color: '#2463eb' } }
+        ],
+        annotations: [
+          { x: 82, y: 85, text: 'High Happy / High Commit', showarrow: false },
+          { x: 58, y: 85, text: 'High Happy / Low Commit', showarrow: false },
+          { x: 58, y: 58, text: 'Low Happy / Low Commit', showarrow: false },
+          { x: 82, y: 58, text: 'Low Happy / High Commit', showarrow: false }
+        ],
+        margin: { t: 30 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        font: { color: varText() }
+      }, { responsive: true });
+    }
+
+    function varText() {
+      return getComputedStyle(document.documentElement).getPropertyValue('--text');
+    }
+    summarize();
+    renderCommitmentScatter();
+    renderCorrelationHeat();
+    renderRegression();
+    renderCluster();
+    renderSatisfactionHeatmap();
+    renderGapAnalysis();
+    renderTopBottom();
+    renderPriorityMatrix();
+    renderSWOT();
+    renderPersona();
+  </script>
+</body>
+</html>
