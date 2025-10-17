@@ -69,6 +69,33 @@
       line-height: 1.6;
     }
 
+    .line-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .line-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(44, 61, 122, 0.1);
+      color: var(--primary);
+      box-shadow: 0 6px 14px rgba(31, 42, 68, 0.06);
+    }
+
+    .line-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+    }
+
     .tab-bar {
       display: flex;
       flex-wrap: wrap;
@@ -362,8 +389,32 @@
     }
 
     .department-name {
+      --department-bg: rgba(44, 61, 122, 0.08);
+      --department-border: rgba(44, 61, 122, 0.12);
+      --department-dot: rgba(44, 61, 122, 0.5);
+      --department-text: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 10px;
+      margin: 0 2px;
+      border-radius: 999px;
+      background: var(--department-bg);
+      border: 1px solid var(--department-border);
       font-weight: 600;
-      color: var(--primary);
+      color: var(--department-text);
+      line-height: 1.4;
+      white-space: nowrap;
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .department-name::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--department-dot);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
     }
 
     .hint {
@@ -1168,6 +1219,7 @@
       <p>
         ข้อมูลนี้สังเคราะห์จากผลสำรวจ Happinometer, ความผูกพัน และความพึงพอใจในการทำงานปี 2568 โดยมุ่งเน้นสำหรับผู้บริหารการพยาบาล เพื่อช่วยชี้โอกาสการเสริมพลังทีมและเฝ้าระวังความเสี่ยงด้านบุคลากร
       </p>
+      <div class="line-legend" id="lineLegend" role="list" aria-label="คำอธิบายสีของสายงาน"></div>
     </header>
 
     <div class="card plan-card">
@@ -1857,6 +1909,206 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
+    const departmentLineColors = {
+      'งานเฉพาะทางและกุมารเวชกรรม': '#f4d0cc',
+      'งานประกันสุขภาพและประกันสังคม': '#6bfaae',
+      'งานผ่าตัด ซักฟอกและโรงนึ่ง': '#7ec99e',
+      'งานผู้ป่วยนอก 1': '#d4a8f3',
+      'งานผู้ป่วยนอก 2': '#fad223',
+      'งานผู้ป่วยวิกฤต': '#e7567a',
+      'งานศัลยกรรม 1': '#2a8885',
+      'งานศัลยกรรม 2': '#d2f501',
+      'งานสูติกรรมและนรีเวชกรรม': '#3385dd',
+      'งานอายุรกรรม 1': '#bc9a69',
+      'งานอายุรกรรม 2': '#555985',
+      'หน่วยอุบัติเหตุและฉุกเฉิน': '#a1d0fd'
+    };
+
+    const departmentLineMap = {
+      '18A': 'งานสูติกรรมและนรีเวชกรรม',
+      '18B': 'งานสูติกรรมและนรีเวชกรรม',
+      '18C': 'งานศัลยกรรม 2',
+      '18D': 'งานเฉพาะทางและกุมารเวชกรรม',
+      '19A': 'งานอายุรกรรม 2',
+      '19B': 'งานศัลยกรรม 1',
+      '19C': 'งานศัลยกรรม 1',
+      '19D': 'งานศัลยกรรม 1',
+      '20B': 'งานศัลยกรรม 1',
+      '20C': 'งานศัลยกรรม 1',
+      '21D': 'งานเฉพาะทางและกุมารเวชกรรม',
+      '22A & Stroke': 'งานอายุรกรรม 1',
+      '22B': 'งานอายุรกรรม 2',
+      '22C': 'งานอายุรกรรม 2',
+      '22D': 'งานอายุรกรรม 1',
+      '23A': 'งานสูติกรรมและนรีเวชกรรม',
+      '24A': 'งานอายุรกรรม 2',
+      '25A': 'งานศัลยกรรม 2',
+      '25B': 'งานศัลยกรรม 2',
+      '26B': 'งานศัลยกรรม 2',
+      '30 บาท': 'งานประกันสุขภาพและประกันสังคม',
+      'Admit Refer': 'หน่วยอุบัติเหตุและฉุกเฉิน',
+      'Burn Unit': 'งานผู้ป่วยวิกฤต',
+      'CCU & Cath Lab': 'งานผู้ป่วยวิกฤต',
+      'Chemo': 'งานเฉพาะทางและกุมารเวชกรรม',
+      'CSSD': 'งานผ่าตัด ซักฟอกและโรงนึ่ง',
+      'DR': 'งานสูติกรรมและนรีเวชกรรม',
+      'ER': 'หน่วยอุบัติเหตุและฉุกเฉิน',
+      'G10': 'งานผ่าตัด ซักฟอกและโรงนึ่ง',
+      'IC': 'งานประกันสุขภาพและประกันสังคม',
+      'MICU': 'งานผู้ป่วยวิกฤต',
+      'NR NICU': 'งานเฉพาะทางและกุมารเวชกรรม',
+      'OPD1': 'งานผู้ป่วยนอก 2',
+      'OPD2': 'งานผู้ป่วยนอก 1',
+      'OPD3': 'งานผู้ป่วยนอก 2',
+      'OPD4': 'งานผู้ป่วยนอก 1',
+      'OR': 'งานผ่าตัด ซักฟอกและโรงนึ่ง',
+      'PICU': 'งานเฉพาะทางและกุมารเวชกรรม',
+      'Refer': 'หน่วยอุบัติเหตุและฉุกเฉิน',
+      'SICU': 'งานผู้ป่วยวิกฤต',
+      'งานระบาด': 'งานประกันสุขภาพและประกันสังคม',
+      'ชุมชน': 'งานประกันสุขภาพและประกันสังคม',
+      'ซักฟอก โรงนึ่ง': 'งานผ่าตัด ซักฟอกและโรงนึ่ง',
+      'ศูนย์บางพระ': 'งานประกันสุขภาพและประกันสังคม',
+      'ศูนย์บางพระฯ': 'งานประกันสุขภาพและประกันสังคม',
+      'ศูนย์บริการสุขภาพ': 'งานประกันสุขภาพและประกันสังคม',
+      'ศูนย์หัวใจ': 'งานผู้ป่วยวิกฤต',
+      'สว.': 'งานอายุรกรรม 1',
+      'ห้องคลอด': 'งานสูติกรรมและนรีเวชกรรม',
+      'ไตเทียม': 'งานผู้ป่วยวิกฤต',
+      'ปฐมภูมิ': 'งานผู้ป่วยนอก 1',
+      'บางพระ': 'งานประกันสุขภาพและประกันสังคม',
+      'บริจาคโลหิต': 'งานผู้ป่วยนอก 1'
+    };
+
+    function hexToRgba(hex, alpha = 1) {
+      if (typeof hex !== 'string') {
+        return null;
+      }
+      let sanitized = hex.trim().replace(/^#/, '');
+      if (sanitized.length === 3) {
+        sanitized = sanitized
+          .split('')
+          .map(ch => ch + ch)
+          .join('');
+      }
+      if (sanitized.length !== 6) {
+        return null;
+      }
+      const int = Number.parseInt(sanitized, 16);
+      if (Number.isNaN(int)) {
+        return null;
+      }
+      const r = (int >> 16) & 255;
+      const g = (int >> 8) & 255;
+      const b = int & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function normalizeDepartmentName(name) {
+      if (typeof name !== 'string') {
+        return '';
+      }
+      return name.replace(/\u200b/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function getDepartmentLine(name) {
+      const normalized = normalizeDepartmentName(name);
+      if (!normalized) {
+        return null;
+      }
+      return departmentLineMap[normalized] || null;
+    }
+
+    function applyDepartmentLineStyle(element, explicitName) {
+      if (!element) {
+        return;
+      }
+
+      const name = normalizeDepartmentName(explicitName || element.textContent || '');
+      const line = getDepartmentLine(name);
+
+      if (!line) {
+        element.removeAttribute('data-line');
+        element.removeAttribute('data-color');
+        element.style.removeProperty('--department-bg');
+        element.style.removeProperty('--department-border');
+        element.style.removeProperty('--department-dot');
+        element.style.removeProperty('--department-text');
+        element.removeAttribute('title');
+        element.removeAttribute('aria-label');
+        return;
+      }
+
+      const color = departmentLineColors[line];
+      element.dataset.line = line;
+      if (color) {
+        element.dataset.color = color;
+        const background = hexToRgba(color, 0.22);
+        const border = hexToRgba(color, 0.45);
+        if (background) {
+          element.style.setProperty('--department-bg', background);
+        }
+        if (border) {
+          element.style.setProperty('--department-border', border);
+        }
+        element.style.setProperty('--department-dot', color);
+        element.style.setProperty('--department-text', '#1f2a44');
+      } else {
+        element.removeAttribute('data-color');
+        element.style.removeProperty('--department-bg');
+        element.style.removeProperty('--department-border');
+        element.style.removeProperty('--department-dot');
+        element.style.removeProperty('--department-text');
+      }
+      element.setAttribute('title', line);
+      element.setAttribute('aria-label', `${name} • ${line}`);
+    }
+
+    function decorateDepartmentNames(root = document) {
+      if (!root) {
+        return;
+      }
+      const elements = root.querySelectorAll
+        ? root.querySelectorAll('.department-name')
+        : [];
+      elements.forEach(element => applyDepartmentLineStyle(element));
+    }
+
+    function renderLineLegend(container) {
+      if (!container) {
+        return;
+      }
+      const fragment = document.createDocumentFragment();
+      Object.entries(departmentLineColors).forEach(([line, color]) => {
+        const item = document.createElement('span');
+        item.className = 'line-legend-item';
+        item.setAttribute('role', 'listitem');
+
+        const dot = document.createElement('span');
+        dot.className = 'line-legend-dot';
+        if (color) {
+          dot.style.backgroundColor = color;
+          const background = hexToRgba(color, 0.2);
+          const border = hexToRgba(color, 0.45);
+          if (background) {
+            item.style.backgroundColor = background;
+          }
+          if (border) {
+            item.style.borderColor = border;
+          }
+        }
+
+        const label = document.createElement('span');
+        label.textContent = line;
+
+        item.appendChild(dot);
+        item.appendChild(label);
+        fragment.appendChild(item);
+      });
+      container.innerHTML = '';
+      container.appendChild(fragment);
+    }
+
     function createDepartmentHighlighter(names) {
       const filtered = Array.isArray(names)
         ? names.filter(name => typeof name === 'string' && name.trim())
@@ -1907,6 +2159,7 @@
           const strong = document.createElement('strong');
           strong.className = 'department-name';
           strong.textContent = match;
+          applyDepartmentLineStyle(strong, match);
           fragment.appendChild(strong);
           lastIndex = offset + match.length;
           return match;
@@ -1932,6 +2185,7 @@
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node;
           if (element.classList && element.classList.contains('department-name')) {
+            applyDepartmentLineStyle(element);
             return;
           }
 
@@ -1974,11 +2228,16 @@
     }
 
     let departmentHighlighter = null;
+    const lineLegendElement = document.getElementById('lineLegend');
+    if (lineLegendElement) {
+      renderLineLegend(lineLegendElement);
+    }
 
     function applyDepartmentHighlight(root) {
       if (departmentHighlighter) {
         departmentHighlighter.apply(root);
       }
+      decorateDepartmentNames(root);
     }
 
     function activateDescriptionToggles(root = document) {
