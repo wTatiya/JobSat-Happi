@@ -361,6 +361,11 @@
       font-size: 0.9rem;
     }
 
+    .department-name {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
     .hint {
       font-size: 0.85rem;
       color: var(--muted);
@@ -1848,6 +1853,134 @@
       element.dataset.toggleBound = 'true';
     }
 
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function createDepartmentHighlighter(names) {
+      const filtered = Array.isArray(names)
+        ? names.filter(name => typeof name === 'string' && name.trim())
+        : [];
+      if (!filtered.length) {
+        return null;
+      }
+
+      const pattern = new RegExp(`(${filtered.map(escapeRegExp).join('|')})`, 'g');
+      const forbiddenTags = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'OPTION', 'TITLE']);
+
+      function processTextNode(node) {
+        if (!node || node.nodeType !== Node.TEXT_NODE) {
+          return;
+        }
+
+        const parent = node.parentNode;
+        if (!parent) {
+          return;
+        }
+
+        if (parent.nodeName === 'STRONG' || parent.closest('.department-name')) {
+          return;
+        }
+
+        if (forbiddenTags.has(parent.nodeName)) {
+          return;
+        }
+
+        const text = node.nodeValue;
+        if (!text) {
+          return;
+        }
+
+        pattern.lastIndex = 0;
+        if (!pattern.test(text)) {
+          return;
+        }
+
+        pattern.lastIndex = 0;
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+
+        text.replace(pattern, (match, _group, offset) => {
+          if (offset > lastIndex) {
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex, offset)));
+          }
+          const strong = document.createElement('strong');
+          strong.className = 'department-name';
+          strong.textContent = match;
+          fragment.appendChild(strong);
+          lastIndex = offset + match.length;
+          return match;
+        });
+
+        if (lastIndex < text.length) {
+          fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+        }
+
+        parent.replaceChild(fragment, node);
+      }
+
+      function processNode(node) {
+        if (!node) {
+          return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+          processTextNode(node);
+          return;
+        }
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node;
+          if (element.classList && element.classList.contains('department-name')) {
+            return;
+          }
+
+          if (forbiddenTags.has(element.nodeName)) {
+            return;
+          }
+
+          element.childNodes.forEach(child => processNode(child));
+        }
+      }
+
+      function apply(root = document.body) {
+        if (!root) {
+          return;
+        }
+        processNode(root);
+      }
+
+      function observe(root = document.body) {
+        if (!root) {
+          return;
+        }
+
+        const observer = new MutationObserver(mutations => {
+          observer.disconnect();
+          mutations.forEach(mutation => {
+            if (mutation.type === 'characterData') {
+              processTextNode(mutation.target);
+            } else if (mutation.type === 'childList') {
+              mutation.addedNodes.forEach(processNode);
+            }
+          });
+          observer.observe(root, { childList: true, characterData: true, subtree: true });
+        });
+
+        observer.observe(root, { childList: true, characterData: true, subtree: true });
+      }
+
+      return { apply, observe };
+    }
+
+    let departmentHighlighter = null;
+
+    function applyDepartmentHighlight(root) {
+      if (departmentHighlighter) {
+        departmentHighlighter.apply(root);
+      }
+    }
+
     function activateDescriptionToggles(root = document) {
       root.querySelectorAll('.description-toggle').forEach(setupDescriptionToggle);
     }
@@ -1876,6 +2009,7 @@
       delete element.dataset.toggleBound;
       element.dataset.state = 'easy';
       setupDescriptionToggle(element);
+      applyDepartmentHighlight(element);
     }
 
     const happinessProfiles = [
@@ -2818,6 +2952,14 @@
         ]
       }
     };
+
+    const departmentNames = Object.keys(unitsData);
+    departmentHighlighter = createDepartmentHighlighter(departmentNames);
+    if (departmentHighlighter) {
+      const highlightRoot = document.querySelector('.dashboard') || document.body;
+      departmentHighlighter.apply(highlightRoot);
+      departmentHighlighter.observe(highlightRoot);
+    }
 
     const personaSummaryElement = document.getElementById('personaSummary');
     const personaGridElement = document.getElementById('personaGrid');
