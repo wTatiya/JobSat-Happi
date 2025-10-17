@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=K2D:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #f2f7ff 0%, #fff5f7 35%, #f3fffa 100%);
@@ -402,6 +403,99 @@
       width: 28px;
       height: 12px;
       border-radius: 999px;
+    }
+
+    .heatmap-wrapper {
+      overflow-x: auto;
+    }
+
+    .heatmap-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 540px;
+    }
+
+    .heatmap-table th,
+    .heatmap-table td {
+      padding: 10px 12px;
+      border: 1px solid rgba(44, 61, 122, 0.08);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .heatmap-table th {
+      background: rgba(44, 61, 122, 0.08);
+      color: var(--primary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .heatmap-cell {
+      border-radius: 12px;
+      padding: 8px 0;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .heatmap-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(31, 42, 68, 0.15);
+    }
+
+    .radar-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .radar-select {
+      min-width: 220px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(44, 61, 122, 0.18);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary);
+      font-size: 0.95rem;
+      box-shadow: inset 0 4px 12px rgba(31, 42, 68, 0.08);
+    }
+
+    .radar-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .radar-chart {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid rgba(44, 61, 122, 0.12);
+      box-shadow: 0 10px 24px rgba(31, 42, 68, 0.08);
+      position: relative;
+    }
+
+    .radar-chart h4 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .radar-chart canvas {
+      width: 100%;
+      height: 320px;
+    }
+
+    .radar-note {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
     }
 
     .cluster-grid {
@@ -1167,6 +1261,38 @@
       </div>
 
       <div class="card">
+        <h3>Heatmap คะแนนความพึงพอใจรายมิติ</h3>
+        <p class="hint">
+          เปรียบเทียบจุดแข็งและช่องว่างของแต่ละหน่วยผ่านสีเข้ม-อ่อน ยิ่งสีเขียวเข้มหมายถึงคะแนนสูงเมื่อเทียบกับหน่วยอื่น
+        </p>
+        <div class="heatmap-wrapper">
+          <table class="heatmap-table" id="satisfactionHeatmap"></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Radar Profiles หน่วยงาน</h3>
+        <p class="hint">
+          เจาะลึกโปรไฟล์ความสุข 11 มิติและความพึงพอใจ 5 มิติของแต่ละหน่วย เพื่อเห็นสมดุลประสบการณ์ในมุมมอง 360 องศา
+        </p>
+        <div class="radar-controls">
+          <span class="metric-title">เลือกหน่วยงาน</span>
+          <select id="radarUnitSelect" class="radar-select"></select>
+        </div>
+        <div class="radar-grid">
+          <div class="radar-chart">
+            <h4>Happinometer 11 มิติ</h4>
+            <canvas id="happinessRadar" width="420" height="320"></canvas>
+          </div>
+          <div class="radar-chart">
+            <h4>Job Satisfaction 5 มิติ</h4>
+            <canvas id="satisfactionRadar" width="420" height="320"></canvas>
+          </div>
+        </div>
+        <div class="radar-note" id="radarNote"></div>
+      </div>
+
+      <div class="card">
         <h3>ประเด็นยุทธศาสตร์ที่ควรขับเคลื่อน</h3>
         <div class="insight-grid">
           <div class="metric">
@@ -1811,6 +1937,108 @@
       });
     }
 
+    function renderSatisfactionHeatmap(table, data, keys) {
+      table.innerHTML = '';
+
+      const headerRow = document.createElement('tr');
+      const corner = document.createElement('th');
+      corner.textContent = 'หน่วยงาน';
+      headerRow.appendChild(corner);
+
+      keys.forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = satisfactionDimensionLabels[key];
+        headerRow.appendChild(th);
+      });
+
+      table.appendChild(headerRow);
+
+      const values = data.flatMap(item => keys.map(key => item[key]));
+      const minValue = Math.min(...values);
+      const maxValue = Math.max(...values);
+
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        const labelCell = document.createElement('th');
+        labelCell.textContent = item.unit;
+        row.appendChild(labelCell);
+
+        keys.forEach(key => {
+          const td = document.createElement('td');
+          const wrapper = document.createElement('div');
+          wrapper.className = 'heatmap-cell';
+          const value = item[key];
+          const color = interpolateHeatmapColor(value, minValue, maxValue);
+          wrapper.style.backgroundColor = color.background;
+          wrapper.style.color = color.text;
+          wrapper.textContent = `${Math.round(value)}%`;
+          wrapper.title = `${item.unit} • ${satisfactionDimensionLabels[key]}: ${value.toFixed(1)}%`;
+          td.appendChild(wrapper);
+          row.appendChild(td);
+        });
+
+        table.appendChild(row);
+      });
+    }
+
+    function interpolateHeatmapColor(value, min, max) {
+      const safeMin = Number.isFinite(min) ? min : 0;
+      const safeMax = Number.isFinite(max) ? max : 100;
+      const denominator = safeMax - safeMin || 1;
+      const ratio = Math.min(Math.max((value - safeMin) / denominator, 0), 1);
+
+      const rgb = heatmapLowColor.map((start, index) => {
+        const end = heatmapHighColor[index];
+        return Math.round(start + (end - start) * ratio);
+      });
+
+      const background = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.85)`;
+      const brightness = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+      const text = brightness > 165 ? '#1f2a44' : '#ffffff';
+
+      return { background, text };
+    }
+
+    function updateRadarCharts(selectedUnit) {
+      if (!happinessRadarChart || !satisfactionRadarChart) {
+        return;
+      }
+
+      const happinessProfile = happinessProfiles.find(profile => profile.unit === selectedUnit);
+      const satisfactionProfile = satisfactionDimensionData.find(item => item.unit === selectedUnit);
+
+      const happinessData = happinessProfile
+        ? dimensionKeys.map(key => happinessProfile.dimensions[key])
+        : dimensionKeys.map(() => Number.NaN);
+
+      const satisfactionData = satisfactionProfile
+        ? satisfactionDimensionKeys.map(key => satisfactionProfile[key])
+        : satisfactionDimensionKeys.map(() => Number.NaN);
+
+      happinessRadarChart.data.datasets[0].data = happinessData;
+      satisfactionRadarChart.data.datasets[0].data = satisfactionData;
+
+      happinessRadarChart.update();
+      satisfactionRadarChart.update();
+
+      if (radarNoteElement) {
+        const notes = [];
+        if (happinessProfile) {
+          notes.push('มีข้อมูล Happinometer ครบทุกมิติ');
+        } else {
+          notes.push('ยังไม่มีข้อมูล Happinometer สำหรับหน่วยนี้');
+        }
+
+        if (satisfactionProfile) {
+          notes.push('มีข้อมูลความพึงพอใจ 5 มิติพร้อมเปรียบเทียบ');
+        } else {
+          notes.push('ยังไม่มีข้อมูลความพึงพอใจในชุดข้อมูลนี้');
+        }
+
+        radarNoteElement.textContent = `${selectedUnit}: ${notes.join(' • ')}`;
+      }
+    }
+
     function formatPersonaMetric(value) {
       if (!Number.isFinite(value)) {
         return '-';
@@ -2058,6 +2286,9 @@
       growth: 'โอกาสเติบโต'
     };
 
+    const heatmapLowColor = [255, 138, 91];
+    const heatmapHighColor = [43, 177, 168];
+
     const tabButtons = document.querySelectorAll('.tab-button');
     const panels = document.querySelectorAll('.panel');
 
@@ -2096,6 +2327,166 @@
     });
 
     updateUnitDetails(unitSelect.value);
+
+    const heatmapElement = document.getElementById('satisfactionHeatmap');
+    if (heatmapElement) {
+      renderSatisfactionHeatmap(heatmapElement, satisfactionDimensionData, satisfactionDimensionKeys);
+    }
+
+    const radarUnitSelect = document.getElementById('radarUnitSelect');
+    const happinessRadarCanvas = document.getElementById('happinessRadar');
+    const satisfactionRadarCanvas = document.getElementById('satisfactionRadar');
+    const radarNoteElement = document.getElementById('radarNote');
+
+    let happinessRadarChart = null;
+    let satisfactionRadarChart = null;
+
+    if (
+      radarUnitSelect &&
+      happinessRadarCanvas &&
+      satisfactionRadarCanvas &&
+      typeof Chart !== 'undefined'
+    ) {
+      const unitOptions = Array.from(
+        new Set([
+          ...happinessProfiles.map(profile => profile.unit),
+          ...satisfactionDimensionData.map(item => item.unit)
+        ])
+      ).sort((a, b) => a.localeCompare(b, 'th'));
+
+      if (!unitOptions.length) {
+        if (radarNoteElement) {
+          radarNoteElement.textContent = 'ยังไม่มีข้อมูลเพียงพอสำหรับสร้างกราฟ Radar';
+        }
+        return;
+      }
+
+      radarUnitSelect.innerHTML = unitOptions
+        .map(unit => `<option value="${unit}">${unit}</option>`)
+        .join('');
+
+      if (!radarUnitSelect.value && unitOptions[0]) {
+        radarUnitSelect.value = unitOptions[0];
+      }
+
+      const happinessLabels = dimensionKeys.map(key => dimensionLabels[key]);
+      const satisfactionLabels = satisfactionDimensionKeys.map(key => satisfactionDimensionLabels[key]);
+
+      happinessRadarChart = new Chart(happinessRadarCanvas.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels: happinessLabels,
+          datasets: [
+            {
+              label: 'Happinometer',
+              data: new Array(happinessLabels.length).fill(Number.NaN),
+              backgroundColor: 'rgba(60, 88, 185, 0.18)',
+              borderColor: '#3c58b9',
+              borderWidth: 2,
+              pointBackgroundColor: '#3c58b9',
+              pointBorderColor: '#fff',
+              pointHoverBackgroundColor: '#fff',
+              pointHoverBorderColor: '#3c58b9'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              suggestedMin: 40,
+              suggestedMax: 100,
+              ticks: {
+                stepSize: 10,
+                backdropColor: 'transparent',
+                color: '#5d6a93'
+              },
+              grid: {
+                color: 'rgba(31, 42, 68, 0.12)'
+              },
+              angleLines: {
+                color: 'rgba(31, 42, 68, 0.12)'
+              },
+              pointLabels: {
+                color: '#1f2a44',
+                font: {
+                  size: 11
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#1f2a44'
+              }
+            }
+          }
+        }
+      });
+
+      satisfactionRadarChart = new Chart(satisfactionRadarCanvas.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels: satisfactionLabels,
+          datasets: [
+            {
+              label: 'Job Satisfaction',
+              data: new Array(satisfactionLabels.length).fill(Number.NaN),
+              backgroundColor: 'rgba(255, 138, 91, 0.22)',
+              borderColor: '#ff8a5b',
+              borderWidth: 2,
+              pointBackgroundColor: '#ff8a5b',
+              pointBorderColor: '#fff',
+              pointHoverBackgroundColor: '#fff',
+              pointHoverBorderColor: '#ff8a5b'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            r: {
+              suggestedMin: 40,
+              suggestedMax: 100,
+              ticks: {
+                stepSize: 10,
+                backdropColor: 'transparent',
+                color: '#5d6a93'
+              },
+              grid: {
+                color: 'rgba(31, 42, 68, 0.12)'
+              },
+              angleLines: {
+                color: 'rgba(31, 42, 68, 0.12)'
+              },
+              pointLabels: {
+                color: '#1f2a44',
+                font: {
+                  size: 11
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#1f2a44'
+              }
+            }
+          }
+        }
+      });
+
+      const defaultUnit = radarUnitSelect.value || unitOptions[0];
+      if (defaultUnit) {
+        updateRadarCharts(defaultUnit);
+      }
+
+      radarUnitSelect.addEventListener('change', event => {
+        updateRadarCharts(event.target.value);
+      });
+    }
 
     const commitmentData = [
       { unit: 'OR', commitment: 58, resignations: 6 },
