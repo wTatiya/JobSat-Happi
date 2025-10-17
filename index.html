@@ -1291,36 +1291,8 @@
 
       <div class="card">
         <h3>อันดับความสุขรวม (Overall Happy)</h3>
-        <div class="chip-group">
-          <div class="chip">Top: หอพัก 90.0%</div>
-          <div class="chip">Top: OPD2 84.3%</div>
-          <div class="chip">Top: CSSD 81.3%</div>
-          <div class="chip" style="background: rgba(255, 138, 91, 0.18); color: #a44a2d;">Low: PICU 48.9%</div>
-          <div class="chip" style="background: rgba(255, 138, 91, 0.18); color: #a44a2d;">Low: 19C 53.9%</div>
-          <div class="chip" style="background: rgba(255, 138, 91, 0.18); color: #a44a2d;">Low: 20B 57.0%</div>
-        </div>
-        <div class="list">
-          <div class="list-item">
-            <div>
-              <strong>หน่วยที่ขับเคลื่อนประสบการณ์เชิงบวก</strong>
-              <p class="hint description-toggle">
-                <span class="description-text description-easy">CSSD 81.25%, ปฐมภูมิ 80.0%, OPD3 74.21% ร่วมสร้างต้นแบบทีมสุขภาพจิตดี</span>
-                <span class="description-text description-advanced">CSSD 81.25%, ปฐมภูมิ 80.0% และ OPD3 74.21% มีคะแนนสูงกว่ามัธยฐานอย่างมีนัยสำคัญ (ส่วนเบี่ยงเบนมาตรฐานบวก) จัดอยู่ในกลุ่มเปอร์เซ็นไทล์ ≥ 70 จึงเป็นฐานข้อมูลสำหรับการวิเคราะห์เชิงอ้างอิง</span>
-              </p>
-            </div>
-            <span>ดัชนี ≥ 74%</span>
-          </div>
-          <div class="list-item">
-            <div>
-              <strong>พื้นที่ต้องเสริมสุขภาพองค์รวม</strong>
-              <p class="hint description-toggle">
-                <span class="description-text description-easy">PICU (Relax 52.89%, Happy Plus 48.15%), 20B (Body 62.4%, Relax 48.8%) และ 19C (Relax 50.86%) ต้องเติมพลังงานและระบบสนับสนุน</span>
-                <span class="description-text description-advanced">คะแนน Relax ต่ำกว่า 55% และ Happy Plus ต่ำกว่า 50% ของ PICU, 20B และ 19C อยู่ในช่วงควอไทล์ล่างสุดของการแจกแจง บ่งชี้ความเสี่ยงเชิงสถิติที่ต้องเสริมทรัพยากรและมาตรการฟื้นฟู</span>
-              </p>
-            </div>
-            <span>ดัชนี &lt; 60%</span>
-          </div>
-        </div>
+        <div class="chip-group" id="happinessDistribution"></div>
+        <div class="list" id="happinessHighlights"></div>
       </div>
 
       <div class="card">
@@ -1869,6 +1841,19 @@
 
     function escapeRegExp(string) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) {
+        return '';
+      }
+      return value
+        .toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     const departmentLineColors = {
@@ -2594,6 +2579,34 @@
       return total / items.length;
     }
 
+    function calculateMedian(values) {
+      if (!values.length) {
+        return Number.NaN;
+      }
+      const sorted = [...values].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      if (sorted.length % 2) {
+        return sorted[mid];
+      }
+      return (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function calculateQuantile(values, percentile) {
+      if (!values.length || !Number.isFinite(percentile)) {
+        return Number.NaN;
+      }
+      const ratio = Math.min(Math.max(percentile, 0), 1);
+      const sorted = [...values].sort((a, b) => a - b);
+      const position = (sorted.length - 1) * ratio;
+      const base = Math.floor(position);
+      const fraction = position - base;
+      const nextValue = sorted[base + 1];
+      if (nextValue !== undefined) {
+        return sorted[base] + fraction * (nextValue - sorted[base]);
+      }
+      return sorted[base];
+    }
+
     function calculatePearson(data, xKey, yKey) {
       const n = data.length;
       if (n < 2) {
@@ -3116,6 +3129,15 @@
       departmentHighlighter.observe(highlightRoot);
     }
 
+    const happinessDistributionElement = document.getElementById('happinessDistribution');
+    const happinessHighlightsElement = document.getElementById('happinessHighlights');
+    if (happinessDistributionElement || happinessHighlightsElement) {
+      const happinessEntries = Object.entries(unitsData)
+        .map(([unit, data]) => ({ unit, value: parsePercentageValue(data.happy) }))
+        .filter(entry => Number.isFinite(entry.value));
+      renderHappinessSummary(happinessEntries, happinessDistributionElement, happinessHighlightsElement);
+    }
+
     const personaSummaryElement = document.getElementById('personaSummary');
     const personaGridElement = document.getElementById('personaGrid');
 
@@ -3161,6 +3183,157 @@
         return '—';
       }
       return `${value.toFixed(decimals)}%`;
+    }
+
+    function formatDifferenceFromAverage(diff) {
+      if (!Number.isFinite(diff) || Math.abs(diff) < 0.05) {
+        return 'ใกล้เคียงค่าเฉลี่ยองค์กร';
+      }
+      const label = diff > 0 ? 'สูงกว่าค่าเฉลี่ยองค์กร' : 'ต่ำกว่าค่าเฉลี่ยองค์กร';
+      return `${label} ${formatPercentageWithDecimals(Math.abs(diff), 1)}`;
+    }
+
+    function formatUnitList(units, limit = 4) {
+      if (!units.length) {
+        return '';
+      }
+      const names = units.map(item => item.unit);
+      if (names.length <= limit) {
+        return names.join(', ');
+      }
+      const visible = names.slice(0, limit);
+      return `${visible.join(', ')} และอีก ${names.length - limit} หน่วย`;
+    }
+
+    function renderHappinessSummary(entries, distributionElement, highlightsElement) {
+      if (distributionElement) {
+        if (!entries.length) {
+          distributionElement.innerHTML = '<div class="chip">ยังไม่มีข้อมูล</div>';
+        } else {
+          const values = entries.map(entry => entry.value);
+          const average = calculateAverage(values);
+          const median = calculateMedian(values);
+          const q1 = calculateQuantile(values, 0.25);
+          const q3 = calculateQuantile(values, 0.75);
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+
+          const chips = [];
+          if (Number.isFinite(average)) {
+            chips.push(`ค่าเฉลี่ยองค์กร ${formatPercentageWithDecimals(average, 1)}`);
+          }
+          if (Number.isFinite(median)) {
+            chips.push(`ค่ามัธยฐาน ${formatPercentageWithDecimals(median, 1)}`);
+          }
+          if (Number.isFinite(q1) && Number.isFinite(q3)) {
+            chips.push(`IQR ${formatPercentageWithDecimals(q1, 1)} – ${formatPercentageWithDecimals(q3, 1)}`);
+          }
+          if (Number.isFinite(min) && Number.isFinite(max)) {
+            chips.push(`ช่วงคะแนน ${formatPercentageWithDecimals(min, 1)} – ${formatPercentageWithDecimals(max, 1)}`);
+          }
+
+          if (!chips.length) {
+            distributionElement.innerHTML = '<div class="chip">ยังไม่มีข้อมูล</div>';
+          } else {
+            distributionElement.innerHTML = chips
+              .map(value => `<div class="chip">${escapeHtml(value)}</div>`)
+              .join('');
+          }
+        }
+      }
+
+      if (!highlightsElement) {
+        return;
+      }
+
+      highlightsElement.innerHTML = '';
+
+      if (!entries.length) {
+        const placeholder = document.createElement('p');
+        placeholder.className = 'hint';
+        placeholder.textContent = 'ยังไม่มีข้อมูลความสุขรวมเพื่อสรุปภาพรวม';
+        highlightsElement.appendChild(placeholder);
+        return;
+      }
+
+      const total = entries.length;
+      const values = entries.map(entry => entry.value);
+      const overallAverage = calculateAverage(values);
+      const veryHappy = entries.filter(entry => entry.value >= 75);
+      const midBand = entries.filter(entry => entry.value >= 60 && entry.value < 75);
+      const lowBand = entries.filter(entry => entry.value < 60);
+
+      const createListItem = (title, badge, easyText, advancedText) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'list-item';
+
+        const textContainer = document.createElement('div');
+        const heading = document.createElement('strong');
+        heading.textContent = title;
+        textContainer.appendChild(heading);
+
+        const description = document.createElement('p');
+        description.className = 'hint';
+        applyDescriptionContent(description, escapeHtml(easyText), escapeHtml(advancedText));
+        textContainer.appendChild(description);
+
+        wrapper.appendChild(textContainer);
+
+        if (badge) {
+          const badgeElement = document.createElement('span');
+          badgeElement.textContent = badge;
+          wrapper.appendChild(badgeElement);
+        }
+
+        applyDepartmentHighlight(wrapper);
+        return wrapper;
+      };
+
+      const items = [];
+
+      if (veryHappy.length) {
+        const share = total ? (veryHappy.length / total) * 100 : 0;
+        const veryHappyValues = veryHappy.map(item => item.value);
+        const veryHappyAverage = calculateAverage(veryHappyValues);
+        const diff = veryHappyAverage - overallAverage;
+        const easy = `${formatUnitList(veryHappy, 4)} อยู่ในระดับสุขมาก (≥75%) คิดเป็น ${formatPercentageWithDecimals(share, 0)} ของหน่วยทั้งหมด`;
+        const advanced = `ค่าเฉลี่ยกลุ่มสุขมาก = ${formatPercentageWithDecimals(veryHappyAverage, 1)} (${formatDifferenceFromAverage(diff)}) ใช้เป็น benchmark สำหรับการโค้ชข้ามหน่วย`;
+        items.push(createListItem('ฐานหน่วยสุขมาก', `${veryHappy.length}/${total} หน่วย`, easy, advanced));
+      }
+
+      if (midBand.length) {
+        const share = total ? (midBand.length / total) * 100 : 0;
+        const midValues = midBand.map(item => item.value);
+        const midMin = Math.min(...midValues);
+        const midMax = Math.max(...midValues);
+        const midMedian = calculateMedian(midValues);
+        const easy = `${formatUnitList(midBand, 4)} อยู่ในระดับ "สุข" (60–74%) คิดเป็น ${formatPercentageWithDecimals(share, 0)} ของหน่วยทั้งหมด`;
+        const advanced = `ช่วงคะแนนของกลุ่มหลักอยู่ระหว่าง ${formatPercentageWithDecimals(midMin, 1)}–${formatPercentageWithDecimals(midMax, 1)} ค่ากลาง = ${formatPercentageWithDecimals(midMedian, 1)} เหมาะสำหรับการตั้งเป้าดันสู่ ≥75%`;
+        items.push(createListItem('กลุ่มคะแนนหลัก', `${midBand.length}/${total} หน่วย`, easy, advanced));
+      }
+
+      if (lowBand.length) {
+        const share = total ? (lowBand.length / total) * 100 : 0;
+        const lowValues = lowBand.map(item => item.value);
+        const lowAverage = calculateAverage(lowValues);
+        const lowMin = Math.min(...lowValues);
+        const diff = lowAverage - overallAverage;
+        const easy = `${formatUnitList(lowBand, 3)} อยู่ต่ำกว่า 60% (กลุ่มเสี่ยง) คิดเป็น ${formatPercentageWithDecimals(share, 0)} ของหน่วยทั้งหมด`;
+        const advanced = `ค่าเฉลี่ยกลุ่มเสี่ยง = ${formatPercentageWithDecimals(lowAverage, 1)} (${formatDifferenceFromAverage(diff)}) • ต่ำสุด ${formatPercentageWithDecimals(lowMin, 1)} ต้องวางแผนฟื้นฟูเฉพาะด้าน`;
+        items.push(createListItem('หน่วยที่ต้องเร่งฟื้นฟู', `${lowBand.length}/${total} หน่วย`, easy, advanced));
+      }
+
+      if (!items.length) {
+        const placeholder = document.createElement('p');
+        placeholder.className = 'hint';
+        placeholder.textContent = 'ยังไม่มีข้อมูลช่วงคะแนนที่เพียงพอสำหรับสรุป';
+        highlightsElement.appendChild(placeholder);
+        return;
+      }
+
+      items.forEach(item => {
+        highlightsElement.appendChild(item);
+      });
     }
 
     function evaluateKpi(value, target, higherIsBetter) {
