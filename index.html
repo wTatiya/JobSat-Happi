@@ -824,24 +824,36 @@
       justify-content: space-between;
       gap: 12px;
       align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .persona-tag,
+    .persona-score {
+      min-width: 0;
+      max-width: 100%;
+      font-size: clamp(0.68rem, 1.7vw, 0.82rem);
+      line-height: 1.2;
     }
 
     .persona-tag {
-      font-size: 0.82rem;
       font-weight: 600;
       color: var(--primary);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      flex: 1 1 auto;
     }
 
     .persona-score {
-      font-size: 0.82rem;
       font-weight: 600;
       color: var(--muted);
       background: rgba(44, 61, 122, 0.1);
       border-radius: 999px;
       padding: 4px 10px;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 1 auto;
     }
 
     .persona-card.positive .persona-score {
