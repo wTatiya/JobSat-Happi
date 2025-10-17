@@ -77,23 +77,9 @@
     }
 
     .line-legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(44, 61, 122, 0.1);
+      font-size: 0.9rem;
+      font-weight: 600;
       color: var(--primary);
-      box-shadow: 0 6px 14px rgba(31, 42, 68, 0.06);
-    }
-
-    .line-legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
     }
 
     .tab-bar {
@@ -389,32 +375,8 @@
     }
 
     .department-name {
-      --department-bg: rgba(44, 61, 122, 0.08);
-      --department-border: rgba(44, 61, 122, 0.12);
-      --department-dot: rgba(44, 61, 122, 0.5);
-      --department-text: var(--primary);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 10px;
-      margin: 0 2px;
-      border-radius: 999px;
-      background: var(--department-bg);
-      border: 1px solid var(--department-border);
       font-weight: 600;
-      color: var(--department-text);
-      line-height: 1.4;
-      white-space: nowrap;
-      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-    }
-
-    .department-name::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--department-dot);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+      color: var(--primary);
     }
 
     .hint {
@@ -1980,30 +1942,6 @@
       'บริจาคโลหิต': 'งานผู้ป่วยนอก 1'
     };
 
-    function hexToRgba(hex, alpha = 1) {
-      if (typeof hex !== 'string') {
-        return null;
-      }
-      let sanitized = hex.trim().replace(/^#/, '');
-      if (sanitized.length === 3) {
-        sanitized = sanitized
-          .split('')
-          .map(ch => ch + ch)
-          .join('');
-      }
-      if (sanitized.length !== 6) {
-        return null;
-      }
-      const int = Number.parseInt(sanitized, 16);
-      if (Number.isNaN(int)) {
-        return null;
-      }
-      const r = (int >> 16) & 255;
-      const g = (int >> 8) & 255;
-      const b = int & 255;
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-
     function normalizeDepartmentName(name) {
       if (typeof name !== 'string') {
         return '';
@@ -2030,36 +1968,13 @@
       if (!line) {
         element.removeAttribute('data-line');
         element.removeAttribute('data-color');
-        element.style.removeProperty('--department-bg');
-        element.style.removeProperty('--department-border');
-        element.style.removeProperty('--department-dot');
-        element.style.removeProperty('--department-text');
         element.removeAttribute('title');
         element.removeAttribute('aria-label');
         return;
       }
 
-      const color = departmentLineColors[line];
       element.dataset.line = line;
-      if (color) {
-        element.dataset.color = color;
-        const background = hexToRgba(color, 0.22);
-        const border = hexToRgba(color, 0.45);
-        if (background) {
-          element.style.setProperty('--department-bg', background);
-        }
-        if (border) {
-          element.style.setProperty('--department-border', border);
-        }
-        element.style.setProperty('--department-dot', color);
-        element.style.setProperty('--department-text', '#1f2a44');
-      } else {
-        element.removeAttribute('data-color');
-        element.style.removeProperty('--department-bg');
-        element.style.removeProperty('--department-border');
-        element.style.removeProperty('--department-dot');
-        element.style.removeProperty('--department-text');
-      }
+      element.removeAttribute('data-color');
       element.setAttribute('title', line);
       element.setAttribute('aria-label', `${name} • ${line}`);
     }
@@ -2079,30 +1994,11 @@
         return;
       }
       const fragment = document.createDocumentFragment();
-      Object.entries(departmentLineColors).forEach(([line, color]) => {
+      Object.keys(departmentLineColors).forEach(line => {
         const item = document.createElement('span');
         item.className = 'line-legend-item';
         item.setAttribute('role', 'listitem');
-
-        const dot = document.createElement('span');
-        dot.className = 'line-legend-dot';
-        if (color) {
-          dot.style.backgroundColor = color;
-          const background = hexToRgba(color, 0.2);
-          const border = hexToRgba(color, 0.45);
-          if (background) {
-            item.style.backgroundColor = background;
-          }
-          if (border) {
-            item.style.borderColor = border;
-          }
-        }
-
-        const label = document.createElement('span');
-        label.textContent = line;
-
-        item.appendChild(dot);
-        item.appendChild(label);
+        item.textContent = line;
         fragment.appendChild(item);
       });
       container.innerHTML = '';
