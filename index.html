@@ -1228,16 +1228,7 @@
       <div class="card">
         <h2>แดชบอร์ดโฟกัสสำหรับผู้บริหาร</h2>
         <p class="hint">เลือกหน่วยงานเพื่อดูสรุปคะแนนสำคัญและสัญญาณเตือน</p>
-        <select class="unit-select" id="unitSelect">
-          <option value="หอพัก">หอพัก</option>
-          <option value="OPD2">OPD2</option>
-          <option value="CSSD">CSSD</option>
-          <option value="PICU">PICU</option>
-          <option value="20B">20B</option>
-          <option value="ER">ER</option>
-          <option value="ไตเทียม">ไตเทียม</option>
-          <option value="SICU">SICU</option>
-        </select>
+        <select class="unit-select" id="unitSelect"></select>
         <div class="unit-details" id="unitDetails">
           <div class="detail-row">
             <span>ความสุขรวม (Happinometer)</span>
@@ -2179,39 +2170,21 @@
     }
 
     const unitsData = {
-      "หอพัก": {
-        happy: "90.0%",
-        engagement: "73.33%",
+      "18D": {
+        happy: "71%",
+        engagement: "74%",
+        job: "75%",
+        alerts: [
+          "รักษาคะแนนผูกพัน ≥70% พร้อมมีลาออกเพียง 2 คน แสดงผลของการสื่อสารและการสนับสนุนที่ต่อเนื่อง"
+        ]
+      },
+      "19C": {
+        happy: "53.9%",
+        engagement: "60.71%",
         job: "ไม่มีข้อมูล",
         alerts: [
-          "คะแนนสุขภาวะองค์รวมสูงทุกมิติ เหมาะเป็นพื้นที่แลกเปลี่ยนแนวปฏิบัติที่ดี"
-        ]
-      },
-      "OPD2": {
-        happy: "84.29%",
-        engagement: "77.62%",
-        job: "78.80%",
-        alerts: [
-          "คะแนนค่าตอบแทนและสวัสดิการ 83.40% สนับสนุนการรักษากำลังคน",
-          "ควรต่อยอดโครงการพัฒนาผู้นำสายงานเพื่อรักษาคะแนนสูงต่อเนื่อง"
-        ]
-      },
-      "CSSD": {
-        happy: "81.25%",
-        engagement: "70.65%",
-        job: "83.20%",
-        alerts: [
-          "การบังคับบัญชาสูงถึง 85.60% เป็นตัวอย่างการจัดการทีม",
-          "ควรลงทุนต่อเนื่องในเทคโนโลยีสนับสนุนเพื่อลดภาระงานซ้ำ"
-        ]
-      },
-      "PICU": {
-        happy: "48.89%",
-        engagement: "62.72%",
-        job: "81.00%",
-        alerts: [
-          "มิติ Relax เพียง 52.89% และ Happy Plus 48.15% ต้องเร่งเสริมกำลังใจ",
-          "แม้สิ่งแวดล้อมการทำงานสูง (92.80%) แต่ต้องเติมทรัพยากรบุคลากรและวันพัก"
+          "อยู่ในกลุ่มคะแนนความสุขต่ำ 53.9% ต้องเติมพลังงานและระบบสนับสนุน",
+          "มิติ Relax 50.86% สะท้อนภาระงานที่ต้องเร่งจัดการ"
         ]
       },
       "20B": {
@@ -2223,6 +2196,42 @@
           "แนะนำจัดโครงการ Care for Caregivers และกำหนดผู้ช่วยสนับสนุน"
         ]
       },
+      "22A & Stroke": {
+        happy: "ไม่มีข้อมูล",
+        engagement: "59.39%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "คะแนนความผูกพัน 59.39% อยู่ในกลุ่มที่ต้องเฝ้าระวัง",
+          "สิ่งแวดล้อมการทำงาน 75.6% ยังต่ำกว่าค่าเฉลี่ยหน่วยบริการ"
+        ]
+      },
+      "23A": {
+        happy: "72%",
+        engagement: "76%",
+        job: "76%",
+        alerts: [
+          "หน่วยที่รักษาผูกพัน ≥70% เช่น 18D และ 23A มีการลาออกเพียง 2 คน",
+          "ข้อมูลลาออกปี 2568 บันทึกเพียง 2 คน ช่วยสะท้อนการรักษากำลังคน"
+        ]
+      },
+      "CSSD": {
+        happy: "81.25%",
+        engagement: "70.65%",
+        job: "83.20%",
+        alerts: [
+          "การบังคับบัญชาสูงถึง 85.60% เป็นตัวอย่างการจัดการทีม",
+          "ควรลงทุนต่อเนื่องในเทคโนโลยีสนับสนุนเพื่อลดภาระงานซ้ำ"
+        ]
+      },
+      "DR": {
+        happy: "64%",
+        engagement: "65%",
+        job: "70%",
+        alerts: [
+          "MICU และ DR อยู่ในกลุ่มผูกพันต่ำ (<65%) และสูญเสียรวม 6 คน",
+          "ข้อมูลลาออกปี 2568 ระบุ DR มี 3 คน ต้องวางแผนพยุงกำลังคน"
+        ]
+      },
       "ER": {
         happy: "68.48%",
         engagement: "66.94%",
@@ -2230,6 +2239,110 @@
         alerts: [
           "ค่าตอบแทนและสวัสดิการ 68.20% (ปานกลาง) ต้องเร่งทบทวน",
           "ภาระงานสูงสะท้อนใน Relax 58.42% ต้องเพิ่มเวลาพักและทีมสนับสนุน"
+        ]
+      },
+      "MICU": {
+        happy: "59%",
+        engagement: "63%",
+        job: "66%",
+        alerts: [
+          "MICU และ DR อยู่ในกลุ่มผูกพันต่ำ (<65%) และสูญเสียรวม 6 คน",
+          "ข้อมูลลาออกปี 2568 ระบุ MICU มี 3 คน สะท้อนผลของเวรหนัก"
+        ]
+      },
+      "OPD2": {
+        happy: "84.29%",
+        engagement: "77.62%",
+        job: "78.80%",
+        alerts: [
+          "คะแนนค่าตอบแทนและสวัสดิการ 83.40% สนับสนุนการรักษากำลังคน",
+          "ควรต่อยอดโครงการพัฒนาผู้นำสายงานเพื่อรักษาคะแนนสูงต่อเนื่อง"
+        ]
+      },
+      "OPD3": {
+        happy: "74.21%",
+        engagement: "ไม่มีข้อมูล",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "คะแนนความสุขรวม 74.21% อยู่ในกลุ่มทีมสุขภาพจิตดีร่วมกับ CSSD และปฐมภูมิ"
+        ]
+      },
+      "OR": {
+        happy: "62%",
+        engagement: "60%",
+        job: "68%",
+        alerts: [
+          "OR มีผูกพันเพียง 58% แต่มีการลาออกสูงสุด 6 คน ต้องเร่งเสริมแผนรักษาคน",
+          "แบบจำลองลาออกสะท้อนภาระงานสูง (workloadPressure 0.78) แม้ความพึงพอใจ 68%"
+        ]
+      },
+      "PICU": {
+        happy: "48.89%",
+        engagement: "62.72%",
+        job: "81.00%",
+        alerts: [
+          "มิติ Relax เพียง 52.89% และ Happy Plus 48.15% ต้องเร่งเสริมกำลังใจ",
+          "แม้สิ่งแวดล้อมการทำงานสูง (92.80%) แต่ต้องเติมทรัพยากรบุคลากรและวันพัก"
+        ]
+      },
+      "Refer": {
+        happy: "68%",
+        engagement: "70%",
+        job: "73%",
+        alerts: [
+          "ข้อมูลลาออก 2 คนพร้อมคะแนนผูกพัน 69% ต้องเฝ้าระวังการรักษาทีม",
+          "แบบจำลองลาออกแสดงความสุข 68% และความพึงพอใจ 73% ต้องคุมภาระงานต่อเนื่อง"
+        ]
+      },
+      "SICU": {
+        happy: "65.00%",
+        engagement: "64.96%",
+        job: "72.40%",
+        alerts: [
+          "ลักษณะงาน 67.80% (ปานกลาง) ต้องปรับสัดส่วนเวร",
+          "มิติ Relax 56.92% ควรเสริมทีมสนับสนุนด้านจิตใจ"
+        ]
+      },
+      "สำนักงาน": {
+        happy: "ไม่มีข้อมูล",
+        engagement: "ไม่มีข้อมูล",
+        job: "87.2%",
+        alerts: [
+          "โดดเด่นในสิ่งแวดล้อมการทำงาน 90% และสวัสดิการ 86% เป็นต้นแบบพื้นที่สนับสนุน",
+          "การบังคับบัญชา 87.6% สูงสุด สะท้อนภาวะผู้นำที่ชัดเจน"
+        ]
+      },
+      "งานระบาด": {
+        happy: "ไม่มีข้อมูล",
+        engagement: "93.33%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "คะแนนความผูกพัน 4.67 (93.33%) สะท้อนผู้นำและภารกิจชัดเจน"
+        ]
+      },
+      "ผู้บริหาร": {
+        happy: "75.43%",
+        engagement: "80.58%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "ความผูกพันสูงควบคู่ความสุข 75.43% ชี้บทบาทผู้นำที่ต้องต่อยอด"
+        ]
+      },
+      "ปฐมภูมิ": {
+        happy: "80.0%",
+        engagement: "78.67%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "อยู่ในกลุ่มทีมสุขภาพจิตดีและมีระบบทีมหนุน Happy Plus 84%",
+          "คะแนนความผูกพัน 78.67% ช่วยรักษาผลงานต่อเนื่อง"
+        ]
+      },
+      "หอพัก": {
+        happy: "90.0%",
+        engagement: "73.33%",
+        job: "ไม่มีข้อมูล",
+        alerts: [
+          "คะแนนสุขภาวะองค์รวมสูงทุกมิติ เหมาะเป็นพื้นที่แลกเปลี่ยนแนวปฏิบัติที่ดี"
         ]
       },
       "ไตเทียม": {
@@ -2241,13 +2354,13 @@
           "ควรสื่อสารเส้นทางความก้าวหน้าและสวัสดิการเฉพาะทางเพิ่ม"
         ]
       },
-      "SICU": {
-        happy: "65.00%",
-        engagement: "64.96%",
-        job: "72.40%",
+      "บางพระ": {
+        happy: "66%",
+        engagement: "68%",
+        job: "72%",
         alerts: [
-          "ลักษณะงาน 67.80% (ปานกลาง) ต้องปรับสัดส่วนเวร",
-          "มิติ Relax 56.92% ควรเสริมทีมสนับสนุนด้านจิตใจ"
+          "MICU / DR / บางพระ มีการลาออก 3 คน ต้องทบทวนแผนเวรและสวัสดิการ",
+          "ข้อมูลลาออกปี 2568 ระบุบางพระ 3 คน พร้อมคะแนนความสุข 66% และพึงพอใจ 72%"
         ]
       }
     };
@@ -2309,12 +2422,33 @@
     const alertList = document.getElementById('alertList');
 
     function updateUnitDetails(unit) {
+      if (!happyScore || !engagementScore || !jobScore || !alertList) {
+        return;
+      }
+
       const data = unitsData[unit];
-      happyScore.textContent = data.happy;
-      engagementScore.textContent = data.engagement;
-      jobScore.textContent = data.job;
+      if (!data) {
+        happyScore.textContent = 'ไม่มีข้อมูล';
+        engagementScore.textContent = 'ไม่มีข้อมูล';
+        jobScore.textContent = 'ไม่มีข้อมูล';
+        alertList.innerHTML = '';
+        const emptyState = document.createElement('div');
+        emptyState.className = 'alert-item';
+        emptyState.textContent = 'ไม่มีข้อมูลสำหรับหน่วยงานนี้';
+        alertList.appendChild(emptyState);
+        return;
+      }
+
+      happyScore.textContent = data.happy || 'ไม่มีข้อมูล';
+      engagementScore.textContent = data.engagement || 'ไม่มีข้อมูล';
+      jobScore.textContent = data.job || 'ไม่มีข้อมูล';
+
       alertList.innerHTML = '';
-      data.alerts.forEach(item => {
+      const alerts = Array.isArray(data.alerts) && data.alerts.length
+        ? data.alerts
+        : ['ไม่มีข้อมูลสัญญาณเตือนสำหรับหน่วยงานนี้'];
+
+      alerts.forEach(item => {
         const div = document.createElement('div');
         div.className = 'alert-item';
         div.textContent = item;
@@ -2322,11 +2456,28 @@
       });
     }
 
-    unitSelect.addEventListener('change', (event) => {
-      updateUnitDetails(event.target.value);
-    });
+    if (unitSelect) {
+      const sortedUnits = Object.keys(unitsData).sort((a, b) => a.localeCompare(b, 'th'));
 
-    updateUnitDetails(unitSelect.value);
+      unitSelect.innerHTML = '';
+      sortedUnits.forEach(unit => {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = unit;
+        unitSelect.appendChild(option);
+      });
+
+      unitSelect.addEventListener('change', event => {
+        updateUnitDetails(event.target.value);
+      });
+
+      if (sortedUnits.length) {
+        unitSelect.value = sortedUnits[0];
+        updateUnitDetails(sortedUnits[0]);
+      } else {
+        updateUnitDetails();
+      }
+    }
 
     const heatmapElement = document.getElementById('satisfactionHeatmap');
     if (heatmapElement) {
