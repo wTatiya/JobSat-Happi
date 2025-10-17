@@ -400,6 +400,31 @@
       background: rgba(255, 255, 255, 0.85);
     }
 
+    .plan-card {
+      margin-bottom: 32px;
+    }
+
+    .plan-card p {
+      margin: 0;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .plan-card p + p {
+      margin-top: 12px;
+    }
+
+    .plan-card ol {
+      margin: 16px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .plan-card ol li + li {
+      margin-top: 8px;
+    }
+
     .matrix-cell {
       border-radius: 12px;
       padding: 8px 0;
@@ -1040,6 +1065,19 @@
         ข้อมูลนี้สังเคราะห์จากผลสำรวจ Happinometer, ความผูกพัน และความพึงพอใจในการทำงานปี 2568 โดยมุ่งเน้นสำหรับผู้บริหารการพยาบาล เพื่อช่วยชี้โอกาสการเสริมพลังทีมและเฝ้าระวังความเสี่ยงด้านบุคลากร
       </p>
     </header>
+
+    <div class="card plan-card">
+      <h2>แผนปฏิบัติการ ปีงบประมาณ 2570</h2>
+      <p><strong>แผนงานประจำฝ่ายการพยาบาล</strong></p>
+      <p><strong>ยุทธศาสตร์ที่ 1</strong> การพัฒนาบุคลากรทางการแพทย์และการบริการทางการแพทย์ที่มีคุณภาพได้มาตรฐานระดับนานาชาติ</p>
+      <p><strong>ผลผลิตที่ 1</strong> การบริการรักษาพยาบาล ฟื้นฟูสภาพ สร้างเสริมสุขภาพและป้องกันโรคให้ผู้ป่วย และประชาชนกลุ่มเป้าหมาย</p>
+      <h3>ชื่อตัวชี้วัดความสำเร็จของงาน</h3>
+      <ol>
+        <li>ร้อยละคะแนนเฉลี่ยความพึงพอใจของบุคลากร ≥80%</li>
+        <li>ร้อยละคะแนนเฉลี่ยความผูกพันของบุคลากร ≥75%</li>
+        <li>อัตราการลาออกของพยาบาล (Turn over rate) ≤5%</li>
+      </ol>
+    </div>
 
     <nav class="tab-bar">
       <button class="tab-button active" data-target="overview">ภาพรวมความสุข</button>
