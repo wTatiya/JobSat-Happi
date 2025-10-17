@@ -2358,134 +2358,135 @@
         if (radarNoteElement) {
           radarNoteElement.textContent = 'ยังไม่มีข้อมูลเพียงพอสำหรับสร้างกราฟ Radar';
         }
-        return;
-      }
+      } else {
+        radarUnitSelect.innerHTML = unitOptions
+          .map(unit => `<option value="${unit}">${unit}</option>`)
+          .join('');
 
-      radarUnitSelect.innerHTML = unitOptions
-        .map(unit => `<option value="${unit}">${unit}</option>`)
-        .join('');
+        if (!radarUnitSelect.value && unitOptions[0]) {
+          radarUnitSelect.value = unitOptions[0];
+        }
 
-      if (!radarUnitSelect.value && unitOptions[0]) {
-        radarUnitSelect.value = unitOptions[0];
-      }
+        const happinessLabels = dimensionKeys.map(key => dimensionLabels[key]);
+        const satisfactionLabels = satisfactionDimensionKeys.map(
+          key => satisfactionDimensionLabels[key]
+        );
 
-      const happinessLabels = dimensionKeys.map(key => dimensionLabels[key]);
-      const satisfactionLabels = satisfactionDimensionKeys.map(key => satisfactionDimensionLabels[key]);
-
-      happinessRadarChart = new Chart(happinessRadarCanvas.getContext('2d'), {
-        type: 'radar',
-        data: {
-          labels: happinessLabels,
-          datasets: [
-            {
-              label: 'Happinometer',
-              data: new Array(happinessLabels.length).fill(Number.NaN),
-              backgroundColor: 'rgba(60, 88, 185, 0.18)',
-              borderColor: '#3c58b9',
-              borderWidth: 2,
-              pointBackgroundColor: '#3c58b9',
-              pointBorderColor: '#fff',
-              pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: '#3c58b9'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            r: {
-              suggestedMin: 40,
-              suggestedMax: 100,
-              ticks: {
-                stepSize: 10,
-                backdropColor: 'transparent',
-                color: '#5d6a93'
-              },
-              grid: {
-                color: 'rgba(31, 42, 68, 0.12)'
-              },
-              angleLines: {
-                color: 'rgba(31, 42, 68, 0.12)'
-              },
-              pointLabels: {
-                color: '#1f2a44',
-                font: {
-                  size: 11
+        happinessRadarChart = new Chart(happinessRadarCanvas.getContext('2d'), {
+          type: 'radar',
+          data: {
+            labels: happinessLabels,
+            datasets: [
+              {
+                label: 'Happinometer',
+                data: new Array(happinessLabels.length).fill(Number.NaN),
+                backgroundColor: 'rgba(60, 88, 185, 0.18)',
+                borderColor: '#3c58b9',
+                borderWidth: 2,
+                pointBackgroundColor: '#3c58b9',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#3c58b9'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              r: {
+                suggestedMin: 40,
+                suggestedMax: 100,
+                ticks: {
+                  stepSize: 10,
+                  backdropColor: 'transparent',
+                  color: '#5d6a93'
+                },
+                grid: {
+                  color: 'rgba(31, 42, 68, 0.12)'
+                },
+                angleLines: {
+                  color: 'rgba(31, 42, 68, 0.12)'
+                },
+                pointLabels: {
+                  color: '#1f2a44',
+                  font: {
+                    size: 11
+                  }
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#1f2a44'
                 }
               }
             }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: '#1f2a44'
-              }
-            }
           }
-        }
-      });
+        });
 
-      satisfactionRadarChart = new Chart(satisfactionRadarCanvas.getContext('2d'), {
-        type: 'radar',
-        data: {
-          labels: satisfactionLabels,
-          datasets: [
-            {
-              label: 'Job Satisfaction',
-              data: new Array(satisfactionLabels.length).fill(Number.NaN),
-              backgroundColor: 'rgba(255, 138, 91, 0.22)',
-              borderColor: '#ff8a5b',
-              borderWidth: 2,
-              pointBackgroundColor: '#ff8a5b',
-              pointBorderColor: '#fff',
-              pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: '#ff8a5b'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            r: {
-              suggestedMin: 40,
-              suggestedMax: 100,
-              ticks: {
-                stepSize: 10,
-                backdropColor: 'transparent',
-                color: '#5d6a93'
-              },
-              grid: {
-                color: 'rgba(31, 42, 68, 0.12)'
-              },
-              angleLines: {
-                color: 'rgba(31, 42, 68, 0.12)'
-              },
-              pointLabels: {
-                color: '#1f2a44',
-                font: {
-                  size: 11
+        satisfactionRadarChart = new Chart(satisfactionRadarCanvas.getContext('2d'), {
+          type: 'radar',
+          data: {
+            labels: satisfactionLabels,
+            datasets: [
+              {
+                label: 'Job Satisfaction',
+                data: new Array(satisfactionLabels.length).fill(Number.NaN),
+                backgroundColor: 'rgba(255, 138, 91, 0.22)',
+                borderColor: '#ff8a5b',
+                borderWidth: 2,
+                pointBackgroundColor: '#ff8a5b',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#ff8a5b'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              r: {
+                suggestedMin: 40,
+                suggestedMax: 100,
+                ticks: {
+                  stepSize: 10,
+                  backdropColor: 'transparent',
+                  color: '#5d6a93'
+                },
+                grid: {
+                  color: 'rgba(31, 42, 68, 0.12)'
+                },
+                angleLines: {
+                  color: 'rgba(31, 42, 68, 0.12)'
+                },
+                pointLabels: {
+                  color: '#1f2a44',
+                  font: {
+                    size: 11
+                  }
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#1f2a44'
                 }
               }
             }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: '#1f2a44'
-              }
-            }
           }
+        });
+
+        const defaultUnit = radarUnitSelect.value || unitOptions[0];
+        if (defaultUnit) {
+          updateRadarCharts(defaultUnit);
         }
-      });
 
-      const defaultUnit = radarUnitSelect.value || unitOptions[0];
-      if (defaultUnit) {
-        updateRadarCharts(defaultUnit);
+        radarUnitSelect.addEventListener('change', event => {
+          updateRadarCharts(event.target.value);
+        });
       }
-
-      radarUnitSelect.addEventListener('change', event => {
-        updateRadarCharts(event.target.value);
-      });
     }
 
     const commitmentData = [
