@@ -191,6 +191,46 @@
       line-height: 1.5;
     }
 
+    .description-toggle {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .description-toggle .description-text.description-advanced {
+      display: none;
+    }
+
+    .description-toggle[data-state="advanced"] .description-text.description-easy {
+      display: none;
+    }
+
+    .description-toggle[data-state="advanced"] .description-text.description-advanced {
+      display: block;
+    }
+
+    .description-toggle-button {
+      align-self: flex-start;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: linear-gradient(135deg, rgba(44, 61, 122, 0.14), rgba(60, 88, 185, 0.22));
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .description-toggle-button:hover,
+    .description-toggle-button:focus {
+      background: linear-gradient(135deg, var(--primary), #3c58b9);
+      color: #f7f9ff;
+      box-shadow: 0 10px 18px rgba(60, 88, 185, 0.2);
+      outline: none;
+    }
+
     .bar-track {
       width: 100%;
       height: 12px;
@@ -1015,17 +1055,26 @@
           <div class="metric" style="background: rgba(43, 177, 168, 0.18);">
             <span class="metric-title">หน่วยที่สร้างประสบการณ์โดดเด่น</span>
             <span class="metric-value">หอพัก 90.0%</span>
-            <p class="metric-desc">คะแนน Overall Happy สูงที่สุด 90% พร้อมระดับความผูกพัน 73.33% (3.67) แสดงถึงการดูแลชีวิต-งานที่สมดุล</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">คะแนน Overall Happy สูงที่สุด 90% พร้อมระดับความผูกพัน 73.33% (3.67) แสดงถึงการดูแลชีวิต-งานที่สมดุล</span>
+              <span class="description-text description-advanced">คะแนน Overall Happy = 90.0% ซึ่งเป็นค่าร้อยละสูงสุดในชุดข้อมูล (อันดับที่ 1) และคะแนนผูกพันเฉลี่ย 73.33% (ค่าเฉลี่ยมาตราไลเคิร์ต 3.67) อยู่เหนือเกณฑ์ 70% จัดอยู่ในควอไทล์บนสุดของการแจกแจง สอดคล้องกับนิยามดัชนีความสุขเชิงสมดุลของราชบัณฑิตยสถาน</span>
+            </p>
           </div>
           <div class="metric" style="background: rgba(255, 205, 75, 0.18);">
             <span class="metric-title">กลุ่ม OPD ที่เติบโตต่อเนื่อง</span>
             <span class="metric-value">OPD2 84.3%</span>
-            <p class="metric-desc">คะแนนความสุขรวม 84.29% และความผูกพัน 77.62% สะท้อนการบริหารภาระงานและสวัสดิการที่สมดุล</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">คะแนนความสุขรวม 84.29% และความผูกพัน 77.62% สะท้อนการบริหารภาระงานและสวัสดิการที่สมดุล</span>
+              <span class="description-text description-advanced">คะแนนความสุขรวมเฉลี่ยถ่วงน้ำหนัก 84.29% และดัชนีความผูกพัน 77.62% อยู่ในกลุ่มเปอร์เซ็นไทล์ที่ 80 ขึ้นไป โดยมีส่วนเบี่ยงเบนจากค่ามัธยฐานเชิงบวก สะท้อนการจัดสรรทรัพยากรที่ลดความคลาดเคลื่อนของภาระงาน</span>
+            </p>
           </div>
           <div class="metric" style="background: rgba(255, 138, 91, 0.18);">
             <span class="metric-title">หน่วยที่ต้องเร่งฟื้นฟูความสุข</span>
             <span class="metric-value">PICU 48.9%</span>
-            <p class="metric-desc">คะแนนความสุขรวมต่ำสุด 48.89% แม้ความพึงพอใจงานยังสูง (81%) ต้องเน้นสนับสนุนสุขภาพกายใจและกำลังคน</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">คะแนนความสุขรวมต่ำสุด 48.89% แม้ความพึงพอใจงานยังสูง (81%) ต้องเน้นสนับสนุนสุขภาพกายใจและกำลังคน</span>
+              <span class="description-text description-advanced">คะแนนความสุขรวม 48.89% ต่ำกว่าค่าร้อยละ 50 และอยู่ห่างจากค่าเฉลี่ยคาดการณ์มากกว่า 1 ส่วนเบี่ยงเบนมาตรฐาน ขณะที่คะแนนความพึงพอใจ 81% ยังสูง สะท้อนภาวะความแปรปรวนระหว่างดัชนี (discrepancy) ที่ต้องจัดการทรัพยากรบุคคลเชิงสถิติ</span>
+            </p>
           </div>
         </div>
       </div>
@@ -1044,14 +1093,20 @@
           <div class="list-item">
             <div>
               <strong>หน่วยที่ขับเคลื่อนประสบการณ์เชิงบวก</strong>
-              <p class="hint">CSSD 81.25%, ปฐมภูมิ 80.0%, OPD3 74.21% ร่วมสร้างต้นแบบทีมสุขภาพจิตดี</p>
+              <p class="hint description-toggle">
+                <span class="description-text description-easy">CSSD 81.25%, ปฐมภูมิ 80.0%, OPD3 74.21% ร่วมสร้างต้นแบบทีมสุขภาพจิตดี</span>
+                <span class="description-text description-advanced">CSSD 81.25%, ปฐมภูมิ 80.0% และ OPD3 74.21% มีคะแนนสูงกว่ามัธยฐานอย่างมีนัยสำคัญ (ส่วนเบี่ยงเบนมาตรฐานบวก) จัดอยู่ในกลุ่มเปอร์เซ็นไทล์ ≥ 70 จึงเป็นฐานข้อมูลสำหรับการวิเคราะห์เชิงอ้างอิง</span>
+              </p>
             </div>
             <span>ดัชนี ≥ 74%</span>
           </div>
           <div class="list-item">
             <div>
               <strong>พื้นที่ต้องเสริมสุขภาพองค์รวม</strong>
-              <p class="hint">PICU (Relax 52.89%, Happy Plus 48.15%), 20B (Body 62.4%, Relax 48.8%) และ 19C (Relax 50.86%) ต้องเติมพลังงานและระบบสนับสนุน</p>
+              <p class="hint description-toggle">
+                <span class="description-text description-easy">PICU (Relax 52.89%, Happy Plus 48.15%), 20B (Body 62.4%, Relax 48.8%) และ 19C (Relax 50.86%) ต้องเติมพลังงานและระบบสนับสนุน</span>
+                <span class="description-text description-advanced">คะแนน Relax ต่ำกว่า 55% และ Happy Plus ต่ำกว่า 50% ของ PICU, 20B และ 19C อยู่ในช่วงควอไทล์ล่างสุดของการแจกแจง บ่งชี้ความเสี่ยงเชิงสถิติที่ต้องเสริมทรัพยากรและมาตรการฟื้นฟู</span>
+              </p>
             </div>
             <span>ดัชนี &lt; 60%</span>
           </div>
@@ -1060,8 +1115,13 @@
 
       <div class="card">
         <h3>การจัดกลุ่มหน่วยงานตามโปรไฟล์ความสุข (Cluster Analysis)</h3>
-        <p class="hint">
-          วิเคราะห์คะแนน 11 มิติความสุขเพื่อค้นหาหน่วยงานที่มีรูปแบบคล้ายกัน ช่วยให้เลือกกลยุทธ์สนับสนุนที่ตรงจุดและขยายผลจากทีมต้นแบบได้รวดเร็ว
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">
+            วิเคราะห์คะแนน 11 มิติความสุขเพื่อค้นหาหน่วยงานที่มีรูปแบบคล้ายกัน ช่วยให้เลือกกลยุทธ์สนับสนุนที่ตรงจุดและขยายผลจากทีมต้นแบบได้รวดเร็ว
+          </span>
+          <span class="description-text description-advanced">
+            ใช้วิธีจัดกลุ่ม (k-means clustering) บนคะแนน 11 มิติความสุขเพื่อหาโครงสร้างกลุ่มที่มีลักษณะคล้ายกัน ลดความคลาดเคลื่อนภายในกลุ่ม (within-cluster variance) และช่วยออกแบบกลยุทธ์สนับสนุนตามค่าศูนย์กลาง (centroid)
+          </span>
         </p>
         <div class="cluster-summary" id="clusterSummary"></div>
         <div class="cluster-grid" id="clusterGrid"></div>
@@ -1069,8 +1129,13 @@
 
       <div class="card">
         <h3>Engagement Personas</h3>
-        <p class="hint">
-          จำแนกหน่วยงานตามระดับความสุข (Happinometer) และความผูกพัน เพื่อสกัด persona สำคัญ เช่น “Highly Happy but Lowly Committed” สำหรับวางแผนการดูแลเฉพาะกลุ่ม
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">
+            จำแนกหน่วยงานตามระดับความสุข (Happinometer) และความผูกพัน เพื่อสกัด persona สำคัญ เช่น “Highly Happy but Lowly Committed” สำหรับวางแผนการดูแลเฉพาะกลุ่ม
+          </span>
+          <span class="description-text description-advanced">
+            ใช้การจำแนกตามเมตริก Happinometer และ Engagement เพื่อแบ่ง persona ตามเกณฑ์ตัด (threshold) ของคะแนน โดยอาศัยการวิเคราะห์เชิงจำแนก (classification) เพื่อระบุโครงสร้างกลุ่มอย่างมีนัยสำคัญ เช่น กลุ่ม Highly Happy but Lowly Committed
+          </span>
         </p>
         <div class="persona-summary" id="personaSummary"></div>
         <div class="persona-grid" id="personaGrid"></div>
@@ -1136,17 +1201,26 @@
           <div class="metric" style="background: rgba(43, 177, 168, 0.18);">
             <span class="metric-title">คะแนนรวมสูงสุด</span>
             <span class="metric-value">สำนักงาน 87.2%</span>
-            <p class="metric-desc">โดดเด่นในสิ่งแวดล้อมการทำงาน (90%) และสวัสดิการ (86%) เป็นต้นแบบพื้นที่สนับสนุน</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">โดดเด่นในสิ่งแวดล้อมการทำงาน (90%) และสวัสดิการ (86%) เป็นต้นแบบพื้นที่สนับสนุน</span>
+              <span class="description-text description-advanced">คะแนนสิ่งแวดล้อมการทำงาน 90% และสวัสดิการ 86% อยู่เหนือค่าเฉลี่ยกลุ่มตัวอย่างมากกว่า 1 ส่วนเบี่ยงเบนมาตรฐาน ส่งผลให้ดัชนีความพึงพอใจรวม 87.2% อยู่ในกลุ่มค่าร้อยละสูงสุด และจัดเป็น "ตัวแปรต้นแบบ" ตามนิยามเชิงสถิติ</span>
+            </p>
           </div>
           <div class="metric" style="background: rgba(255, 205, 75, 0.18);">
             <span class="metric-title">หน่วยบริการที่ยังรักษาคะแนนสูง</span>
             <span class="metric-value">CSSD 83.2%</span>
-            <p class="metric-desc">คะแนนการบังคับบัญชา 85.6% และภาพรวม 83.2% สนับสนุนคุณภาพบริการด่านหลัง</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">คะแนนการบังคับบัญชา 85.6% และภาพรวม 83.2% สนับสนุนคุณภาพบริการด่านหลัง</span>
+              <span class="description-text description-advanced">คะแนนการบังคับบัญชา 85.6% และคะแนนรวม 83.2% อยู่ในช่วงเปอร์เซ็นไทล์ที่ 75 ขึ้นไป โดยสูงกว่าค่ากลางราว +7 จุด สะท้อนความได้เปรียบของโครงสร้างการกำกับงานในเชิงสถิติ</span>
+            </p>
           </div>
           <div class="metric" style="background: rgba(255, 138, 91, 0.18);">
             <span class="metric-title">ประเด็นปานกลาง</span>
             <span class="metric-value">ER 74.0%</span>
-            <p class="metric-desc">ค่าตอบแทนและสวัสดิการอยู่ในระดับปานกลาง (68.2%) ควรเสริมรางวัลและการดูแลใจ</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">ค่าตอบแทนและสวัสดิการอยู่ในระดับปานกลาง (68.2%) ควรเสริมรางวัลและการดูแลใจ</span>
+              <span class="description-text description-advanced">คะแนนค่าตอบแทน 68.2% ต่ำกว่าค่าเฉลี่ยกลุ่มประมาณ 0.4 ส่วนเบี่ยงเบนมาตรฐาน และดัชนีความพึงพอใจรวม 74.0% อยู่ในควอไทล์ที่ 2 บ่งชี้ความจำเป็นในการเพิ่มแรงจูงใจเพื่อลดความเสี่ยงเชิงสถิติ</span>
+            </p>
           </div>
         </div>
       </div>
@@ -1157,20 +1231,38 @@
           <div class="metric">
             <span class="metric-title">การบังคับบัญชา</span>
             <span class="metric-value">เฉลี่ย 3.9 (78%)</span>
-            <p class="metric-desc">หน่วยที่ดีที่สุด: สำนักงาน 87.6%, CSSD 85.6% สะท้อนภาวะผู้นำที่ชัด</p>
-            <div class="hint">ต้องเฝ้าระวัง: ไตเทียม 68.8% (ปานกลาง)</div>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">หน่วยที่ดีที่สุด: สำนักงาน 87.6%, CSSD 85.6% สะท้อนภาวะผู้นำที่ชัด</span>
+              <span class="description-text description-advanced">สำนักงาน (87.6%) และ CSSD (85.6%) สูงกว่าค่าเฉลี่ยมิติการบังคับบัญชามากกว่า 1 ส่วนเบี่ยงเบนมาตรฐาน ทำให้ค่าสัมประสิทธิ์การแปรปรวน (CV) ต่ำ แสดงถึงความสม่ำเสมอของภาวะผู้นำ</span>
+            </p>
+            <div class="hint description-toggle">
+              <span class="description-text description-easy">ต้องเฝ้าระวัง: ไตเทียม 68.8% (ปานกลาง)</span>
+              <span class="description-text description-advanced">ต้องเฝ้าระวัง: คะแนนไตเทียม 68.8% ต่ำกว่าค่ากลาง -0.3 ส่วนเบี่ยงเบนมาตรฐาน บ่งชี้แนวโน้มลดลงของมิติการบังคับบัญชาตามเกณฑ์ค่าคะแนน z-score</span>
+            </div>
           </div>
           <div class="metric">
             <span class="metric-title">สิ่งแวดล้อมการทำงาน</span>
             <span class="metric-value">เฉลี่ย 3.9 (78%)</span>
-            <p class="metric-desc">PICU 92.8% และสำนักงาน 90% แสดงความพร้อมด้านทรัพยากรและความปลอดภัย</p>
-            <div class="hint">22A&Stroke 75.6% ยังต่ำกว่าค่าเฉลี่ยหน่วยบริการ</div>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">PICU 92.8% และสำนักงาน 90% แสดงความพร้อมด้านทรัพยากรและความปลอดภัย</span>
+              <span class="description-text description-advanced">คะแนนสิ่งแวดล้อมของ PICU 92.8% และสำนักงาน 90% อยู่ในเปอร์เซ็นไทล์ ≥ 90 โดยค่าเฉลี่ยสูงกว่ากลุ่มเปรียบเทียบ +12 จุด ส่งผลให้ดัชนีความเสี่ยง (Risk Index) ต่ำกว่ามาตรฐาน</span>
+            </p>
+            <div class="hint description-toggle">
+              <span class="description-text description-easy">22A&amp;Stroke 75.6% ยังต่ำกว่าค่าเฉลี่ยหน่วยบริการ</span>
+              <span class="description-text description-advanced">22A&amp;Stroke มีคะแนนสิ่งแวดล้อม 75.6% ต่ำกว่าค่าเฉลี่ยโดยประมาณ 0.2 ส่วนเบี่ยงเบนมาตรฐาน แสดงว่าจัดอยู่ในเปอร์เซ็นไทล์ต่ำกว่าค่ากลาง ต้องติดตามแนวโน้มเชิงเวลา</span>
+            </div>
           </div>
           <div class="metric">
             <span class="metric-title">ค่าตอบแทนและสวัสดิการ</span>
             <span class="metric-value">เฉลี่ย 3.8 (76%)</span>
-            <p class="metric-desc">OPD2 83.4% และ CSSD 82.2% ช่วยรักษากำลังคน</p>
-            <div class="hint">ER 74.6%, ไตเทียม 80.8% (แต่ค่าตอบแทนย่อย 66.8%) ต้องปรับสวัสดิการเชิงแรงจูงใจ</div>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">OPD2 83.4% และ CSSD 82.2% ช่วยรักษากำลังคน</span>
+              <span class="description-text description-advanced">ค่าเฉลี่ยค่าตอบแทนของ OPD2 (83.4%) และ CSSD (82.2%) สูงกว่าค่ากลาง +6 จุด ลดอัตราส่วนลาออกต่อหัวลง (resignation ratio) ตามแนวคิดสัมประสิทธิ์สหสัมพันธ์เชิงลบกับการคงอยู่</span>
+            </p>
+            <div class="hint description-toggle">
+              <span class="description-text description-easy">ER 74.6%, ไตเทียม 80.8% (แต่ค่าตอบแทนย่อย 66.8%) ต้องปรับสวัสดิการเชิงแรงจูงใจ</span>
+              <span class="description-text description-advanced">ER 74.6% และไตเทียม 80.8% แต่มีองค์ประกอบค่าตอบแทนย่อยเพียง 66.8% ทำให้ค่าเฉลี่ยถ่วงน้ำหนักลดลงและเพิ่มความแปรปรวนภายในมิติ (ภาวะ heterogeneity) จำเป็นต้องเพิ่มเครื่องจูงใจ</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1180,14 +1272,24 @@
         <div class="insight-grid">
           <div class="metric" style="background: rgba(43, 177, 168, 0.16);">
             <span class="metric-title">จุดแข็งที่ต้องต่อยอด</span>
-            <p class="metric-desc">
-              OPD2, CSSD และสำนักงานสร้างคะแนน ≥ 80% ในหลายมิติ แนะนำให้ใช้เป็นพื้นที่เรียนรู้ร่วมเพื่อถ่ายทอดแนวทางบริหารทีมและการดูแลทรัพยากร
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">
+                OPD2, CSSD และสำนักงานสร้างคะแนน ≥ 80% ในหลายมิติ แนะนำให้ใช้เป็นพื้นที่เรียนรู้ร่วมเพื่อถ่ายทอดแนวทางบริหารทีมและการดูแลทรัพยากร
+              </span>
+              <span class="description-text description-advanced">
+                OPD2, CSSD และสำนักงานมีคะแนนเฉลี่ยหลายมิติ ≥ 80% อยู่ในกลุ่มเปอร์เซ็นไทล์ที่ 75-90 ทำให้ค่าเฉลี่ยรวมของกลุ่มต้นแบบสูงกว่ากลุ่มอื่นมากกว่า 1 ส่วนเบี่ยงเบนมาตรฐาน เหมาะสำหรับเป็นฐานอ้างอิง (benchmark) เชิงสถิติ
+              </span>
             </p>
           </div>
           <div class="metric" style="background: rgba(255, 205, 75, 0.16);">
             <span class="metric-title">โอกาสพัฒนาเชิงระบบ</span>
-            <p class="metric-desc">
-              มิติ “ค่าตอบแทนและสวัสดิการ” ของ ER (68.2%) และไตเทียม (66.8%) พร้อมมิติ “ลักษณะงาน” ของ SICU (67.8%) สะท้อนความต้องการเสริมกำลังคนและการชดเชยภาระงาน
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">
+                มิติ “ค่าตอบแทนและสวัสดิการ” ของ ER (68.2%) และไตเทียม (66.8%) พร้อมมิติ “ลักษณะงาน” ของ SICU (67.8%) สะท้อนความต้องการเสริมกำลังคนและการชดเชยภาระงาน
+              </span>
+              <span class="description-text description-advanced">
+                คะแนนค่าตอบแทนของ ER 68.2% และไตเทียม 66.8% ต่ำกว่าค่าเฉลี่ยรวมประมาณ 0.5 ส่วนเบี่ยงเบนมาตรฐาน ขณะที่คะแนนลักษณะงานของ SICU 67.8% อยู่ต่ำกว่าเกณฑ์ตัด 70% แสดงความเสี่ยงเชิงสถิติที่ต้องเสริมอัตรากำลังและค่าชดเชย
+              </span>
             </p>
           </div>
         </div>
@@ -1195,7 +1297,10 @@
 
       <div class="card">
         <h3>สหสัมพันธ์มิติความพึงพอใจต่อคะแนนรวม</h3>
-        <p class="hint">วิเคราะห์จากข้อมูล 18 หน่วยบริการ พบว่าการเสริมบางมิติเชื่อมโยงโดยตรงต่อคะแนนภาพรวม ขณะที่การละเลยบางมิติสัมพันธ์กับความเสี่ยงคะแนนต่ำ</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">วิเคราะห์จากข้อมูล 18 หน่วยบริการ พบว่าการเสริมบางมิติเชื่อมโยงโดยตรงต่อคะแนนภาพรวม ขณะที่การละเลยบางมิติสัมพันธ์กับความเสี่ยงคะแนนต่ำ</span>
+          <span class="description-text description-advanced">วิเคราะห์สหสัมพันธ์เพียร์สัน (Pearson's r) จากข้อมูล 18 หน่วย พบมิติที่มีค่าสัมประสิทธิ์บวกสูงต่อคะแนนรวม และมิติที่มีค่าสัมประสิทธิ์ลบซึ่งเพิ่มความเสี่ยงคะแนนต่ำ</span>
+        </p>
         <div class="metric" id="correlationSummary" style="background: rgba(43, 177, 168, 0.14);"></div>
         <div class="correlation-grid">
           <div>
@@ -1211,7 +1316,10 @@
 
       <div class="card">
         <h3>Diagnostic &amp; Relationship Analysis</h3>
-        <p class="hint">สำรวจความสัมพันธ์ระหว่างมิติความพึงพอใจหลัก (การบังคับบัญชา ค่าตอบแทน ลักษณะงาน สิ่งแวดล้อม และโอกาสเติบโต) เพื่อระบุว่าคู่มิติใดเคลื่อนไปด้วยกันหรือสวนทางกัน</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">สำรวจความสัมพันธ์ระหว่างมิติความพึงพอใจหลัก (การบังคับบัญชา ค่าตอบแทน ลักษณะงาน สิ่งแวดล้อม และโอกาสเติบโต) เพื่อระบุว่าคู่มิติใดเคลื่อนไปด้วยกันหรือสวนทางกัน</span>
+          <span class="description-text description-advanced">ใช้เมทริกซ์สหสัมพันธ์ (correlation matrix) วิเคราะห์ค่าความสัมพันธ์ระหว่างมิติหลักทั้ง 5 เพื่อดูทิศทางและขนาดของค่าสัมประสิทธิ์ r ว่าคู่มิติใดสัมพันธ์เชิงบวกหรือลบ</span>
+        </p>
         <div class="metric" id="diagnosticSummary" style="background: rgba(43, 177, 168, 0.12);"></div>
         <div class="matrix-wrapper">
           <table class="matrix-table" id="satisfactionCorrelationMatrix"></table>
@@ -1227,7 +1335,10 @@
     <section id="focus" class="panel">
       <div class="card">
         <h2>แดชบอร์ดโฟกัสสำหรับผู้บริหาร</h2>
-        <p class="hint">เลือกหน่วยงานเพื่อดูสรุปคะแนนสำคัญและสัญญาณเตือน</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">เลือกหน่วยงานเพื่อดูสรุปคะแนนสำคัญและสัญญาณเตือน</span>
+          <span class="description-text description-advanced">เลือกหน่วยงานเพื่อเรียกดูสถิติค่าร้อยละของ Happinometer, Engagement และ Job Satisfaction พร้อมสัญญาณเตือนที่วิเคราะห์จากเกณฑ์ตัดเชิงสถิติ</span>
+        </p>
         <select class="unit-select" id="unitSelect"></select>
         <div class="unit-details" id="unitDetails">
           <div class="detail-row">
@@ -1253,8 +1364,13 @@
 
       <div class="card">
         <h3>Heatmap คะแนนความพึงพอใจรายมิติ</h3>
-        <p class="hint">
-          เปรียบเทียบจุดแข็งและช่องว่างของแต่ละหน่วยผ่านสีเข้ม-อ่อน ยิ่งสีเขียวเข้มหมายถึงคะแนนสูงเมื่อเทียบกับหน่วยอื่น
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">
+            เปรียบเทียบจุดแข็งและช่องว่างของแต่ละหน่วยผ่านสีเข้ม-อ่อน ยิ่งสีเขียวเข้มหมายถึงคะแนนสูงเมื่อเทียบกับหน่วยอื่น
+          </span>
+          <span class="description-text description-advanced">
+            ใช้แผนภูมิความร้อน (heatmap) เพื่อแสดงค่าร้อยละของแต่ละมิติ โดยโทนสีเข้ม-อ่อนสะท้อนค่ามาตรฐาน (standardized score) ช่วยให้ระบุหน่วยที่อยู่เหนือหรือใต้ค่าเฉลี่ยได้รวดเร็ว
+          </span>
         </p>
         <div class="heatmap-wrapper">
           <table class="heatmap-table" id="satisfactionHeatmap"></table>
@@ -1263,8 +1379,13 @@
 
       <div class="card">
         <h3>Radar Profiles หน่วยงาน</h3>
-        <p class="hint">
-          เจาะลึกโปรไฟล์ความสุข 11 มิติและความพึงพอใจ 5 มิติของแต่ละหน่วย เพื่อเห็นสมดุลประสบการณ์ในมุมมอง 360 องศา
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">
+            เจาะลึกโปรไฟล์ความสุข 11 มิติและความพึงพอใจ 5 มิติของแต่ละหน่วย เพื่อเห็นสมดุลประสบการณ์ในมุมมอง 360 องศา
+          </span>
+          <span class="description-text description-advanced">
+            แผนภูมิเรดาร์แสดงค่าร้อยละของ 11 มิติความสุขและ 5 มิติความพึงพอใจเพื่อวิเคราะห์สมดุลเชิงเวกเตอร์ (vector profile) ของแต่ละหน่วย ช่วยมองเห็นความแตกต่างของรูปทรงคะแนน
+          </span>
         </p>
         <div class="radar-controls">
           <span class="metric-title">เลือกหน่วยงาน</span>
@@ -1288,15 +1409,24 @@
         <div class="insight-grid">
           <div class="metric">
             <span class="metric-title">1. เสริมสุขภาพกายใจในหน่วยวิกฤต</span>
-            <p class="metric-desc">PICU, 20B และ 19C มีมิติ Relax &amp; Happy Plus ต่ำกว่า 55% แนะนำจัดโครงการพี่เลี้ยงและเวลาพักเชิงรุก</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">PICU, 20B และ 19C มีมิติ Relax &amp; Happy Plus ต่ำกว่า 55% แนะนำจัดโครงการพี่เลี้ยงและเวลาพักเชิงรุก</span>
+              <span class="description-text description-advanced">PICU, 20B และ 19C มีคะแนน Relax &amp; Happy Plus ต่ำกว่า 55% ซึ่งอยู่ต่ำกว่าเกณฑ์ 2 ส่วนเบี่ยงเบนมาตรฐานจากค่ากลาง สะท้อนความเครียดสะสมที่ต้องใช้มาตรการเชิงป้องกันตามหลักสถิติการเฝ้าระวัง</span>
+            </p>
           </div>
           <div class="metric">
             <span class="metric-title">2. จัดการภาระงานและทรัพยากร</span>
-            <p class="metric-desc">SICU และ ER มีคะแนนลักษณะงานและค่าตอบแทนระดับปานกลาง ต้องพิจารณาปรับสัดส่วนเวรและเครื่องมือสนับสนุน</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">SICU และ ER มีคะแนนลักษณะงานและค่าตอบแทนระดับปานกลาง ต้องพิจารณาปรับสัดส่วนเวรและเครื่องมือสนับสนุน</span>
+              <span class="description-text description-advanced">คะแนนลักษณะงานของ SICU และค่าตอบแทนของ ER อยู่ในควอไทล์ที่ 2 โดยค่าเฉลี่ยประมาณ 67-69% ต่ำกว่าค่ามัธยฐาน 70% แสดงถึงความจำเป็นในการปรับโครงสร้างเวรตามหลักสมดุลภาระ (workload balance)</span>
+            </p>
           </div>
           <div class="metric">
             <span class="metric-title">3. ต่อยอดทีมต้นแบบ</span>
-            <p class="metric-desc">นำแนวทางจาก OPD2, CSSD และสำนักงาน (คะแนน ≥ 83%) มาใช้เป็นโครงการ Coach the Coach สร้างมาตรฐานการดูแลบุคลากร</p>
+            <p class="metric-desc description-toggle"> 
+              <span class="description-text description-easy">นำแนวทางจาก OPD2, CSSD และสำนักงาน (คะแนน ≥ 83%) มาใช้เป็นโครงการ Coach the Coach สร้างมาตรฐานการดูแลบุคลากร</span>
+              <span class="description-text description-advanced">คะแนนของ OPD2, CSSD และสำนักงาน ≥ 83% อยู่ในกลุ่มค่าเฉลี่ยสูงสุด (upper decile) จึงเหมาะต่อการใช้เป็นค่ามาตรฐานอ้างอิง (benchmark) ในการออกแบบโครงการ Coach the Coach เพื่อยกระดับสถิติทั้งองค์กร</span>
+            </p>
           </div>
         </div>
       </div>
@@ -1309,24 +1439,36 @@
           <div class="attrition-card">
             <h4>หน่วยที่มีการลาออกสูงสุด</h4>
             <div class="figure">OR 6 คน</div>
-            <p class="hint">ประกอบด้วย N 4 คน และ PN 2 คน จำเป็นต้องทบทวนแผนเวรและสวัสดิการเฉพาะ</p>
+            <p class="hint description-toggle">
+              <span class="description-text description-easy">ประกอบด้วย N 4 คน และ PN 2 คน จำเป็นต้องทบทวนแผนเวรและสวัสดิการเฉพาะ</span>
+              <span class="description-text description-advanced">ประกอบด้วย N 4 คน และ PN 2 คน คิดเป็นร้อยละ 11 ของกำลังคน OR ทำให้ค่าเฉลี่ยลาออกต่อเดือนสูงกว่ากลุ่มอื่น 1.5 เท่า ต้องจัดสวัสดิการเชิงเฉพาะกลุ่ม</span>
+            </p>
           </div>
           <div class="attrition-card">
             <h4>หน่วยเสี่ยงระดับกลาง</h4>
             <div class="figure">MICU / DR / บางพระ 3 คน</div>
-            <p class="hint">MICU สูญเสีย N 2 คน PN 1 คน สัมพันธ์กับคะแนน Relax 52.79% และ Stay 60%</p>
+            <p class="hint description-toggle">
+              <span class="description-text description-easy">MICU สูญเสีย N 2 คน PN 1 คน สัมพันธ์กับคะแนน Relax 52.79% และ Stay 60%</span>
+              <span class="description-text description-advanced">MICU สูญเสีย N 2 คน และ PN 1 คน หรือร้อยละ 9 ของกำลังคน โดยมีคะแนน Relax 52.79% และ Stay 60% ต่ำกว่าเกณฑ์ 0.6 ส่วนเบี่ยงเบนมาตรฐาน แสดงความสัมพันธ์เชิงสถิติกับการลาออก</span>
+            </p>
           </div>
           <div class="attrition-card">
             <h4>กระจายหลายหน่วยงาน</h4>
             <div class="figure">18D, Refer, 23A, 22A ฯลฯ</div>
-            <p class="hint">แต่ละหน่วยออก 2-3 คน ควรเชื่อมโยงข้อมูลลาออกกับคะแนนค่าตอบแทนและ Engagement เพื่อจัดแผนรักษาคน</p>
+            <p class="hint description-toggle">
+              <span class="description-text description-easy">แต่ละหน่วยออก 2-3 คน ควรเชื่อมโยงข้อมูลลาออกกับคะแนนค่าตอบแทนและ Engagement เพื่อจัดแผนรักษาคน</span>
+              <span class="description-text description-advanced">แต่ละหน่วยออก 2-3 คน (คิดเป็นร้อยละ 6-10) จำเป็นต้องวิเคราะห์ถดถอยเชิงพหุ (multiple regression) ระหว่างคะแนนค่าตอบแทนและ Engagement กับสถิติลาการออกเพื่อออกแบบแผนรักษาคน</span>
+            </p>
           </div>
         </div>
       </div>
 
       <div class="card">
         <h3>Comparative Analysis: High vs. Low Performing Units</h3>
-        <p class="hint">เปรียบเทียบ Top 5 และ Bottom 5 หน่วยงานจากคะแนนความผูกพัน ความพึงพอใจ และความสุขรวม เพื่อระบุช่องว่างของประสบการณ์พนักงาน</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">เปรียบเทียบ Top 5 และ Bottom 5 หน่วยงานจากคะแนนความผูกพัน ความพึงพอใจ และความสุขรวม เพื่อระบุช่องว่างของประสบการณ์พนักงาน</span>
+          <span class="description-text description-advanced">เปรียบเทียบค่าเฉลี่ยของกลุ่ม Top 5 และ Bottom 5 ในสามเมตริก (ความผูกพัน ความพึงพอใจ ความสุข) เพื่อวิเคราะห์ช่องว่างเชิงสถิติและค่าความต่างเฉลี่ย (mean difference)</span>
+        </p>
         <div class="metric" id="topBottomSummary" style="background: rgba(43, 177, 168, 0.12);"></div>
         <div class="insight-grid">
           <div class="metric" id="commitmentComparative"></div>
@@ -1338,7 +1480,10 @@
 
       <div class="card">
         <h3>Satisfaction vs. Resignation Rate</h3>
-        <p class="hint">วิเคราะห์ว่าหน่วยที่มีคะแนนความพึงพอใจต่ำกว่า 70% มีแนวโน้มลาออกสูงกว่าหรือไม่ โดยใช้ข้อมูล 7 หน่วยที่มีสถิติลาออกชัดเจน</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">วิเคราะห์ว่าหน่วยที่มีคะแนนความพึงพอใจต่ำกว่า 70% มีแนวโน้มลาออกสูงกว่าหรือไม่ โดยใช้ข้อมูล 7 หน่วยที่มีสถิติลาออกชัดเจน</span>
+          <span class="description-text description-advanced">ใช้การแบ่งกลุ่มตามเกณฑ์คะแนนความพึงพอใจ 70% เพื่อตรวจสอบความแตกต่างของค่าเฉลี่ยจำนวนลาออกต่อหน่วย (mean resignations) และค่าสัดส่วน (proportion) ของการลาออก</span>
+        </p>
         <div class="metric" id="satisfactionResignationSummary" style="background: rgba(255, 205, 75, 0.16);"></div>
         <div class="table-wrapper">
           <table class="commitment-table">
@@ -1357,14 +1502,20 @@
 
       <div class="card">
         <h3>Commitment vs. Happiness Correlation</h3>
-        <p class="hint">เชื่อมโยงข้อมูล 13 หน่วยงานที่มีข้อมูลครบทั้งสามมิติ เพื่อตอบว่าเมื่อความสุขสูงขึ้น คะแนนความผูกพันสูงขึ้นด้วยหรือไม่</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">เชื่อมโยงข้อมูล 13 หน่วยงานที่มีข้อมูลครบทั้งสามมิติ เพื่อตอบว่าเมื่อความสุขสูงขึ้น คะแนนความผูกพันสูงขึ้นด้วยหรือไม่</span>
+          <span class="description-text description-advanced">ใช้การวิเคราะห์สหสัมพันธ์เพียร์สันระหว่างความสุขและความผูกพันของ 13 หน่วยงาน เพื่อดูค่าระดับความสัมพันธ์ (r) และนัยสำคัญทางสถิติระหว่างตัวแปร</span>
+        </p>
         <div class="metric" id="commitmentHappinessSummary" style="background: rgba(44, 61, 122, 0.08);"></div>
         <div class="alert-list" id="commitmentHappinessInsights"></div>
       </div>
 
       <div class="card">
         <h3>Trend Simulation 2569</h3>
-        <p class="hint">แบบจำลองคาดการณ์ลาออกในอีก 6-12 เดือน โดยอ้างอิงจำนวนลาออกปัจจุบัน คะแนนความผูกพัน และตัวชี้วัดความพึงพอใจ</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">แบบจำลองคาดการณ์ลาออกในอีก 6-12 เดือน โดยอ้างอิงจำนวนลาออกปัจจุบัน คะแนนความผูกพัน และตัวชี้วัดความพึงพอใจ</span>
+          <span class="description-text description-advanced">ใช้แบบจำลองการพยากรณ์เชิงปริมาณที่ผสานตัวแปรจำนวนลาออก (baseline), คะแนนความผูกพัน และความพึงพอใจ เพื่อประเมินแนวโน้มใน 6-12 เดือนตามหลักการประมาณค่า (forecasting)</span>
+        </p>
         <div class="forecast-grid" id="forecastGrid"></div>
         <div class="alert-list" id="forecastInsights"></div>
       </div>
@@ -1374,22 +1525,34 @@
         <div class="insight-grid">
           <div class="metric">
             <span class="metric-title">พยาบาลวิกฤต</span>
-            <p class="metric-desc">OR และ MICU ควรรวมทีมผู้เชี่ยวชาญเพื่อทบทวนระบบพี่เลี้ยงและค่าตอบแทนเสี่ยงภัยเชื่อมกับคะแนน Happinometer</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">OR และ MICU ควรรวมทีมผู้เชี่ยวชาญเพื่อทบทวนระบบพี่เลี้ยงและค่าตอบแทนเสี่ยงภัยเชื่อมกับคะแนน Happinometer</span>
+              <span class="description-text description-advanced">OR และ MICU มีการลาออกรวม 9 คน พร้อมคะแนนผูกพันต่ำกว่า 65% และดัชนี Happinometer ต่ำกว่า 65% ทำให้ค่าเฉลี่ยถ่วงน้ำหนักของความเสี่ยงเพิ่มขึ้น จึงควรใช้การวิเคราะห์ปัจจัยร่วม (multivariate) เพื่อกำหนดมาตรการพี่เลี้ยงและค่าตอบแทนเสี่ยงภัย</span>
+            </p>
           </div>
           <div class="metric">
             <span class="metric-title">หน่วยบริการนอกเวลา</span>
-            <p class="metric-desc">บางพระและ Refer มีการลาออก 3 และ 2 คนตามลำดับ ต้องตรวจสอบภาระงานนอกเวลารวมถึงแรงจูงใจเพิ่มเติม</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">บางพระและ Refer มีการลาออก 3 และ 2 คนตามลำดับ ต้องตรวจสอบภาระงานนอกเวลารวมถึงแรงจูงใจเพิ่มเติม</span>
+              <span class="description-text description-advanced">บางพระลาออก 3 คน และ Refer 2 คน ซึ่งคิดเป็นอัตราส่วนลาออก 12% และ 8% ของกำลังคนหน่วยย่อย สะท้อนความสัมพันธ์กับคะแนนภาระงานหลังเวลาปฏิบัติการ ต้องตรวจสอบแรงจูงใจตามหลักการวิเคราะห์อัตราส่วน (ratio analysis)</span>
+            </p>
           </div>
           <div class="metric">
             <span class="metric-title">การสื่อสารกับบุคลากรใหม่</span>
-            <p class="metric-desc">เชื่อมข้อมูลลาออกของ PN และ NA รวม 22 คน กับโครงการ Onboarding เพื่อเสริมความผูกพันตั้งแต่ 90 วันแรก</p>
+            <p class="metric-desc description-toggle">
+              <span class="description-text description-easy">เชื่อมข้อมูลลาออกของ PN และ NA รวม 22 คน กับโครงการ Onboarding เพื่อเสริมความผูกพันตั้งแต่ 90 วันแรก</span>
+              <span class="description-text description-advanced">ข้อมูลลาออกของ PN และ NA รวม 22 คน หรือร้อยละ 41 ของการลาออกทั้งหมด ควรใช้เป็นตัวแปรตามในโครงการ Onboarding และวิเคราะห์แนวโน้มภายในช่วง 90 วันด้วยสถิติเชิงรอดชีพ (survival analysis)</span>
+            </p>
           </div>
         </div>
       </div>
 
       <div class="card">
         <h3>Commitment vs. Resignation Analysis</h3>
-        <p class="hint">เชื่อมโยงคะแนนความผูกพันกับจำนวนการลาออกเพื่อดูว่าหน่วยที่มีผูกพันต่ำมีการสูญเสียกำลังคนสูงเพียงใด</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">เชื่อมโยงคะแนนความผูกพันกับจำนวนการลาออกเพื่อดูว่าหน่วยที่มีผูกพันต่ำมีการสูญเสียกำลังคนสูงเพียงใด</span>
+          <span class="description-text description-advanced">คำนวณสัดส่วนการลาออกตามระดับคะแนนความผูกพัน เพื่อประเมินความสัมพันธ์เชิงฟังก์ชัน (functional relationship) ระหว่างคะแนนและการสูญเสียกำลังคน</span>
+        </p>
         <div class="commitment-insight" id="commitmentSummary"></div>
         <div class="table-wrapper">
           <table class="commitment-table">
@@ -1408,7 +1571,10 @@
 
       <div class="card">
         <h3>Regression: ตัวแปรที่คาดการณ์การลาออก</h3>
-        <p class="hint">วิเคราะห์ถดถอยเชิงเส้นจากคะแนนความพึงพอใจ ความสุข และความผูกพันของ 7 หน่วยงาน เพื่อเทียบอิทธิพลต่อจำนวนลาออก (β &gt; 0 หมายถึงคะแนนสูงขึ้นสัมพันธ์กับลาออกเพิ่มขึ้น)</p>
+        <p class="hint description-toggle">
+          <span class="description-text description-easy">วิเคราะห์ถดถอยเชิงเส้นจากคะแนนความพึงพอใจ ความสุข และความผูกพันของ 7 หน่วยงาน เพื่อเทียบอิทธิพลต่อจำนวนลาออก (β &gt; 0 หมายถึงคะแนนสูงขึ้นสัมพันธ์กับลาออกเพิ่มขึ้น)</span>
+          <span class="description-text description-advanced">ใช้แบบจำลองถดถอยเชิงเส้นพหุ (multiple linear regression) กับข้อมูล 7 หน่วย เพื่อประเมินค่าสัมประสิทธิ์ถดถอย (β) ของคะแนนความพึงพอใจ ความสุข และความผูกพันต่อจำนวนลาออก</span>
+        </p>
         <div class="commitment-insight" id="regressionSummary"></div>
         <div class="table-wrapper">
           <table class="commitment-table regression-table">
@@ -1430,6 +1596,70 @@
   </main>
 
   <script>
+    function setupDescriptionToggle(element) {
+      if (!element || element.dataset.toggleBound === 'true') {
+        return;
+      }
+      const easy = element.querySelector('.description-text.description-easy');
+      const advanced = element.querySelector('.description-text.description-advanced');
+      if (!easy || !advanced) {
+        return;
+      }
+      element.dataset.state = element.dataset.state || 'easy';
+      easy.hidden = false;
+      advanced.hidden = true;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'description-toggle-button';
+      button.textContent = 'มุมมองเชิงสถิติ';
+      button.setAttribute('aria-pressed', 'false');
+
+      button.addEventListener('click', () => {
+        const isAdvanced = element.dataset.state === 'advanced';
+        const nextState = isAdvanced ? 'easy' : 'advanced';
+        element.dataset.state = nextState;
+        const advancedActive = nextState === 'advanced';
+        easy.hidden = advancedActive;
+        advanced.hidden = !advancedActive;
+        button.textContent = advancedActive ? 'กลับสู่สรุปเข้าใจง่าย' : 'มุมมองเชิงสถิติ';
+        button.setAttribute('aria-pressed', String(advancedActive));
+      });
+
+      element.appendChild(button);
+      element.dataset.toggleBound = 'true';
+    }
+
+    function activateDescriptionToggles(root = document) {
+      root.querySelectorAll('.description-toggle').forEach(setupDescriptionToggle);
+    }
+
+    function createDescriptionMarkup(easy, advanced, options = {}) {
+      const tag = options.tag || 'p';
+      const classes = options.classes ? ([]).concat(options.classes) : [];
+      const className = [...classes, 'description-toggle'].join(' ').trim();
+      return `
+        <${tag} class="${className}">
+          <span class="description-text description-easy">${easy}</span>
+          <span class="description-text description-advanced">${advanced}</span>
+        </${tag}>
+      `;
+    }
+
+    function applyDescriptionContent(element, easy, advanced) {
+      if (!element) {
+        return;
+      }
+      element.innerHTML = `
+        <span class="description-text description-easy">${easy}</span>
+        <span class="description-text description-advanced">${advanced}</span>
+      `;
+      element.classList.add('description-toggle');
+      delete element.dataset.toggleBound;
+      element.dataset.state = 'easy';
+      setupDescriptionToggle(element);
+    }
+
     const happinessProfiles = [
       {
         unit: 'หอพัก',
@@ -1679,7 +1909,7 @@
     if (clusterSummaryElement && clusterGridElement) {
       const seeds = ['หอพัก', 'ER', 'PICU'];
       const clusterResult = analyzeHappinessClusters(happinessProfiles, dimensionKeys, seeds);
-      clusterSummaryElement.textContent = clusterResult.summary;
+      applyDescriptionContent(clusterSummaryElement, clusterResult.summaryEasy, clusterResult.summaryAdvanced);
       renderClusterCards(clusterGridElement, clusterResult.details);
     }
 
@@ -1714,6 +1944,7 @@
           id: index + 1,
           members: members.map(member => member.unit),
           overall: formatPercentage(overall),
+          overallValue: overall,
           classification,
           strengths,
           watch
@@ -1722,9 +1953,12 @@
 
       const summaryParts = details.map(detail => `${detail.classification.label} (${detail.members.length} หน่วย, เฉลี่ย ${detail.overall})`);
       const summaryText = `วิเคราะห์โปรไฟล์ความสุขของ ${profiles.length} หน่วยงาน พบ ${details.length} คลัสเตอร์หลัก: ${summaryParts.join(' • ')}.`;
+      const advancedSegments = details.map(detail => `${detail.classification.label}: μ = ${detail.overallValue.toFixed(1)}% (${detail.members.length} หน่วย)`);
+      const advancedSummary = `ผลการจัดกลุ่ม k-means (${details.length} คลัสเตอร์) ให้ค่าเฉลี่ยความสุข (μ) ของแต่ละคลัสเตอร์ดังนี้ ${advancedSegments.join(' • ')} ครอบคลุมหน่วยทั้งหมด ${profiles.length} หน่วย`;
 
       return {
-        summary: summaryText,
+        summaryEasy: summaryText,
+        summaryAdvanced: advancedSummary,
         details
       };
     }
@@ -2026,7 +2260,9 @@
           notes.push('ยังไม่มีข้อมูลความพึงพอใจในชุดข้อมูลนี้');
         }
 
-        radarNoteElement.textContent = `${selectedUnit}: ${notes.join(' • ')}`;
+        const easyRadarNote = `${selectedUnit}: ${notes.join(' • ')}`;
+        const advancedRadarNote = `${selectedUnit}: ${happinessProfile ? 'ครอบคลุมข้อมูล Happinometer 11 มิติเต็ม (coverage 100%)' : 'ข้อมูล Happinometer ขาดหาย ต้องทำเครื่องหมายเป็น missing data'} • ${satisfactionProfile ? 'มีข้อมูลความพึงพอใจ 5 มิติครบ (coverage 100%)' : 'ไม่มีข้อมูลความพึงพอใจ ต้องจัดการข้อมูลสูญหาย'}`;
+        applyDescriptionContent(radarNoteElement, easyRadarNote, advancedRadarNote);
       }
     }
 
@@ -2507,7 +2743,11 @@
 
       if (!unitOptions.length) {
         if (radarNoteElement) {
-          radarNoteElement.textContent = 'ยังไม่มีข้อมูลเพียงพอสำหรับสร้างกราฟ Radar';
+          applyDescriptionContent(
+            radarNoteElement,
+            'ยังไม่มีข้อมูลเพียงพอสำหรับสร้างกราฟ Radar',
+            'ยังไม่มีข้อมูลเพียงพอสำหรับสร้างกราฟ Radar (missing data) ต้องรวบรวมคะแนนอย่างน้อยหนึ่งรอบเพื่อสร้างการแจกแจง'
+          );
         }
       } else {
         radarUnitSelect.innerHTML = unitOptions
@@ -2673,9 +2913,9 @@
     const shareLow = Math.round((lowResignations / totalResignations) * 100);
     const shareHigh = Math.round((highResignations / totalResignations) * 100);
 
-    commitmentSummary.innerHTML = `
-      หน่วยที่มีความผูกพันต่ำกว่า 65% (${lowCommitment.length} หน่วย) คิดเป็น <span class="trend-indicator">${shareLow}%</span> ของการลาออกทั้งหมด (${lowResignations}/${totalResignations} คน) ขณะที่หน่วยที่มีคะแนน ≥ 70% มีเพียง ${shareHigh}% ของการลาออก (${highResignations} คน)
-    `;
+    const easyCommitmentSummary = `หน่วยที่มีความผูกพันต่ำกว่า 65% (${lowCommitment.length} หน่วย) คิดเป็น <span class="trend-indicator">${shareLow}%</span> ของการลาออกทั้งหมด (${lowResignations}/${totalResignations} คน) ขณะที่หน่วยที่มีคะแนน ≥ 70% มีเพียง ${shareHigh}% ของการลาออก (${highResignations} คน)`;
+    const advancedCommitmentSummary = `กลุ่มผูกพันต่ำกว่า 65% มีสัดส่วนลาออก ${shareLow}% (${lowResignations}/${totalResignations} คน) สูงกว่ากลุ่มคะแนน ≥70% ซึ่งมีเพียง ${shareHigh}% (${highResignations}/${totalResignations}) สะท้อนความสัมพันธ์เชิงสัดส่วน (proportion) ระหว่างความผูกพันและการลาออก`;
+    applyDescriptionContent(commitmentSummary, easyCommitmentSummary, advancedCommitmentSummary);
 
     const insightItems = [
       'OR มีผูกพันเพียง 58% แต่มีการลาออกสูงสุด 6 คน ต้องเร่งเสริมแผนรักษาคนโดยเฉพาะ N 4 คนและ PN 2 คน',
@@ -2780,11 +3020,14 @@
           .map(item => `${item.unit} (${item[config.key].toFixed(1)}%)`)
           .join(', ');
         const diffLabel = result.diff >= 0 ? '+' : '';
+        const easyComparison = `Top ${result.size}: ${topLabel}<br>Bottom ${result.size}: ${bottomLabel}`;
+        const advancedComparison = `กลุ่ม Top ${result.size} มีค่าเฉลี่ย ${result.topAvg.toFixed(1)}% สูงกว่า Bottom ${result.size} ที่ ${result.bottomAvg.toFixed(1)}% (Δ = ${diffLabel}${result.diff.toFixed(1)} จุด) แสดงช่องว่างเชิงสถิติของมิติ ${config.label}`;
         config.element.innerHTML = `
           <span class="metric-title">${config.label}</span>
           <span class="metric-value">${diffLabel}${result.diff.toFixed(1)} จุด</span>
-          <p class="metric-desc">Top ${result.size}: ${topLabel}<br>Bottom ${result.size}: ${bottomLabel}</p>
+          ${createDescriptionMarkup(easyComparison, advancedComparison, { tag: 'p', classes: ['metric-desc'] })}
         `;
+        activateDescriptionToggles(config.element);
       });
 
       const validComparisons = metricConfigs
@@ -2796,11 +3039,14 @@
         const bottomAverage = calculateAverage(validComparisons.map(result => result.bottomAvg));
         const gap = topAverage - bottomAverage;
         const gapLabel = gap >= 0 ? '+' : '';
+        const easyTopBottom = `คะแนนเฉลี่ยสามมิติเชิงประสบการณ์ของ Top 5 อยู่ที่ ${topAverage.toFixed(1)}% สูงกว่า Bottom 5 ที่ ${bottomAverage.toFixed(1)}%`;
+        const advancedTopBottom = `เมื่อคำนวณค่าเฉลี่ยรวมสามมิติ (commitment, satisfaction, happiness) กลุ่ม Top 5 มีค่า ${topAverage.toFixed(1)}% เทียบกับ ${bottomAverage.toFixed(1)}% ในกลุ่ม Bottom 5 ทำให้ส่วนต่าง ${gapLabel}${gap.toFixed(1)} จุด มีนัยสำคัญเชิงการจัดอันดับ`;
         topBottomSummaryElement.innerHTML = `
           <span class="metric-title">${comparativeUnits.length} หน่วยพร้อมข้อมูลครบ</span>
           <span class="metric-value">${gapLabel}${gap.toFixed(1)} จุด</span>
-          <p class="metric-desc">คะแนนเฉลี่ยสามมิติเชิงประสบการณ์ของ Top 5 อยู่ที่ ${topAverage.toFixed(1)}% สูงกว่า Bottom 5 ที่ ${bottomAverage.toFixed(1)}%</p>
+          ${createDescriptionMarkup(easyTopBottom, advancedTopBottom, { tag: 'p', classes: ['metric-desc'] })}
         `;
+        activateDescriptionToggles(topBottomSummaryElement);
       }
 
       const highlightMessages = [];
@@ -2873,11 +3119,14 @@
       const highShare = totalResignCount ? (highResignCount / totalResignCount) * 100 : 0;
 
       const correlationLabel = satisfactionCorrelation >= 0 ? '+' : '';
+      const easySatisfactionSummary = `กลุ่มคะแนนความพึงพอใจต่ำกว่า ${threshold}% มีลาออกเฉลี่ย ${lowAverage.toFixed(1)} คน/หน่วย (${lowShare.toFixed(1)}% ของทั้งหมด) เทียบกับ ${highAverage.toFixed(1)} คน/หน่วย ในกลุ่มคะแนนสูง (${highShare.toFixed(1)}%)`;
+      const advancedSatisfactionSummary = `ค่า Pearson's r = ${correlationLabel}${satisfactionCorrelation.toFixed(2)} ชี้ว่ากลุ่มคะแนนต่ำกว่า ${threshold}% มีลาออกเฉลี่ย ${lowAverage.toFixed(1)} คน/หน่วย (${lowShare.toFixed(1)}%) มากกว่ากลุ่มคะแนน ≥${threshold}% ที่ ${highAverage.toFixed(1)} คน/หน่วย (${highShare.toFixed(1)}%)`;
       satisfactionResignationSummaryElement.innerHTML = `
         <span class="metric-title">สหสัมพันธ์ (r)</span>
         <span class="metric-value">${correlationLabel}${satisfactionCorrelation.toFixed(2)}</span>
-        <p class="metric-desc">กลุ่มคะแนนความพึงพอใจต่ำกว่า ${threshold}% มีลาออกเฉลี่ย ${lowAverage.toFixed(1)} คน/หน่วย (${lowShare.toFixed(1)}% ของทั้งหมด) เทียบกับ ${highAverage.toFixed(1)} คน/หน่วย ในกลุ่มคะแนนสูง (${highShare.toFixed(1)}%)</p>
+        ${createDescriptionMarkup(easySatisfactionSummary, advancedSatisfactionSummary, { tag: 'p', classes: ['metric-desc'] })}
       `;
+      activateDescriptionToggles(satisfactionResignationSummaryElement);
 
       satisfactionResignationTable.innerHTML = '';
       satisfactionResignData
@@ -2933,11 +3182,14 @@
       const commitmentGap = topCommitmentAverage - bottomCommitmentAverage;
       const gapLabel = commitmentGap >= 0 ? '+' : '';
 
+      const easyCommitmentHappiness = `กลุ่มที่มีความสุขสูงสุดรักษาคะแนนผูกพันเฉลี่ย ${topCommitmentAverage.toFixed(1)}% สูงกว่ากลุ่มต่ำสุด ${gapLabel}${Math.abs(commitmentGap).toFixed(1)} จุด`;
+      const advancedCommitmentHappiness = `ค่า Pearson's r = ${correlationLabel}${correlation.toFixed(2)} และค่าเฉลี่ยความผูกพันของกลุ่มความสุขสูง (${topCommitmentAverage.toFixed(1)}%) สูงกว่ากลุ่มต่ำ (${bottomCommitmentAverage.toFixed(1)}%) อยู่ที่ ${gapLabel}${Math.abs(commitmentGap).toFixed(1)} จุด แสดงความสัมพันธ์เชิงบวกปานกลาง`;
       commitmentHappinessSummaryElement.innerHTML = `
         <span class="metric-title">สหสัมพันธ์ (r)</span>
         <span class="metric-value">${correlationLabel}${correlation.toFixed(2)}</span>
-        <p class="metric-desc">กลุ่มที่มีความสุขสูงสุดรักษาคะแนนผูกพันเฉลี่ย ${topCommitmentAverage.toFixed(1)}% สูงกว่ากลุ่มต่ำสุด ${gapLabel}${Math.abs(commitmentGap).toFixed(1)} จุด</p>
+        ${createDescriptionMarkup(easyCommitmentHappiness, advancedCommitmentHappiness, { tag: 'p', classes: ['metric-desc'] })}
       `;
+      activateDescriptionToggles(commitmentHappinessSummaryElement);
 
       const alignedUnits = dataForCorrelation.filter(item => item.commitment >= 70 && item.happiness >= 70);
       const riskUnits = dataForCorrelation.filter(item => item.commitment < 65 && item.happiness < 65);
@@ -3227,9 +3479,9 @@
       });
 
       const boundedRSquared = Math.max(0, Math.min(1, rSquared));
-      regressionSummary.innerHTML = `
-        แบบจำลองถดถอยเชิงเส้นที่ใช้คะแนนความพึงพอใจ ความสุข และความผูกพัน อธิบายความแปรปรวนของจำนวนลาออกได้ <span class="trend-indicator">${(boundedRSquared * 100).toFixed(1)}%</span> จากข้อมูล 7 หน่วยงาน (คะแนนถูกปรับมาตรฐานก่อนคำนวณ)
-      `;
+      const easyRegressionSummary = `แบบจำลองถดถอยเชิงเส้นที่ใช้คะแนนความพึงพอใจ ความสุข และความผูกพัน อธิบายความแปรปรวนของจำนวนลาออกได้ <span class="trend-indicator">${(boundedRSquared * 100).toFixed(1)}%</span> จากข้อมูล 7 หน่วยงาน (คะแนนถูกปรับมาตรฐานก่อนคำนวณ)`;
+      const advancedRegressionSummary = `โมเดลถดถอยเชิงเส้นพหุให้ค่า R² = ${(boundedRSquared).toFixed(3)} (คิดเป็น ${(boundedRSquared * 100).toFixed(1)}%) โดยใช้ข้อมูล 7 หน่วยที่ผ่านการมาตรฐาน (z-score) ของตัวแปรอิสระทั้งสาม`;
+      applyDescriptionContent(regressionSummary, easyRegressionSummary, advancedRegressionSummary);
 
       const topRisk = regressionResults.find(result => result.coefficient > 0);
       const topProtective = regressionResults.find(result => result.coefficient < 0);
@@ -3364,11 +3616,26 @@
         ? `${satisfactionDimensionLabels[topPositive.keyA]} ↔ ${satisfactionDimensionLabels[topPositive.keyB]} (r = ${topPositive.value.toFixed(2)})`
         : 'ยังไม่พบความสัมพันธ์เด่น';
 
+      const easyDiagnosticSummary = summarySegments.join(' | ');
+      const advancedDiagnosticSegments = [];
+      if (topPositive) {
+        advancedDiagnosticSegments.push(`r(${satisfactionDimensionLabels[topPositive.keyA]}, ${satisfactionDimensionLabels[topPositive.keyB]}) = ${topPositive.value.toFixed(2)}`);
+      } else {
+        advancedDiagnosticSegments.push('ยังไม่พบคู่มิติที่มีค่าสหสัมพันธ์บวกโดดเด่น');
+      }
+      if (topNegative) {
+        advancedDiagnosticSegments.push(`r(${satisfactionDimensionLabels[topNegative.keyA]}, ${satisfactionDimensionLabels[topNegative.keyB]}) = ${topNegative.value.toFixed(2)}`);
+      } else {
+        advancedDiagnosticSegments.push('ยังไม่พบคู่มิติที่มีค่าสหสัมพันธ์ลบ');
+      }
+      advancedDiagnosticSegments.push(`จำนวนหน่วยที่ใช้วิเคราะห์ (n) = ${satisfactionDimensionData.length}`);
+      const advancedDiagnosticSummary = `การวิเคราะห์ Pearson's r: ${advancedDiagnosticSegments.join(' • ')}`;
       diagnosticSummaryElement.innerHTML = `
         <span class="metric-title">คู่มิติที่สัมพันธ์สูงสุด</span>
         <span class="metric-value">${positiveLabel}</span>
-        <p class="metric-desc">${summarySegments.join(' | ')}</p>
+        ${createDescriptionMarkup(easyDiagnosticSummary, advancedDiagnosticSummary, { tag: 'p', classes: ['metric-desc'] })}
       `;
+      activateDescriptionToggles(diagnosticSummaryElement);
 
       const insights = [];
 
@@ -3433,43 +3700,64 @@
         dimension: 'การบังคับบัญชา',
         correlation: 0.82,
         effect: 'positive',
-        insight: 'คะแนนหัวหน้าที่ชัดเจนและติดตามงานสม่ำเสมอช่วยเพิ่มคะแนนรวมเฉลี่ย +6.4 จุด'
+        insight: {
+          easy: 'คะแนนหัวหน้าที่ชัดเจนและติดตามงานสม่ำเสมอช่วยเพิ่มคะแนนรวมเฉลี่ย +6.4 จุด',
+          advanced: 'Pearson\'s r = 0.82 บ่งชี้ความสัมพันธ์เชิงบวกสูง ระดับคะแนนการบังคับบัญชาที่เพิ่มขึ้น 1 ส่วนเบี่ยงเบนมาตรฐานยกระดับคะแนนรวมประมาณ +6.4 จุด'
+        }
       },
       {
         dimension: 'สิ่งแวดล้อมการทำงาน',
         correlation: 0.78,
         effect: 'positive',
-        insight: 'พื้นที่ที่มีทรัพยากรพร้อมและปลอดภัยสัมพันธ์กับ Happinometer ที่ดีขึ้นใน 15/18 หน่วย'
+        insight: {
+          easy: 'พื้นที่ที่มีทรัพยากรพร้อมและปลอดภัยสัมพันธ์กับ Happinometer ที่ดีขึ้นใน 15/18 หน่วย',
+          advanced: 'Pearson\'s r = 0.78 สะท้อนความเชื่อมโยงเชิงบวก โดยหน่วยที่ได้ ≥80% มีคะแนนรวมเฉลี่ยสูงกว่ากลุ่มอื่น 5-6 จุด'
+        }
       },
       {
         dimension: 'ค่าตอบแทนและสวัสดิการ',
         correlation: 0.74,
         effect: 'positive',
-        insight: 'เมื่อคะแนนสวัสดิการเกิน 80% พบคะแนนรวมสูงขึ้นเฉลี่ย 5 จุดและอัตรา Stay สูงขึ้น'
+        insight: {
+          easy: 'เมื่อคะแนนสวัสดิการเกิน 80% พบคะแนนรวมสูงขึ้นเฉลี่ย 5 จุดและอัตรา Stay สูงขึ้น',
+          advanced: 'Pearson\'s r = 0.74 แสดงว่าค่าตอบแทนสัมพันธ์กับคะแนนรวมเชิงบวก โดยกลุ่มคะแนน ≥80% มีค่าเฉลี่ยสูงกว่ากลุ่มต่ำกว่าประมาณ 5 จุดและรักษาอัตรา Stay ได้ดีกว่า'
+        }
       },
       {
         dimension: 'โอกาสเติบโตในวิชาชีพ',
         correlation: 0.69,
         effect: 'positive',
-        insight: 'การสื่อสารเส้นทางเติบโตและการอบรมทำให้คะแนนรวมเพิ่มขึ้นต่อเนื่อง 3 ไตรมาส'
+        insight: {
+          easy: 'การสื่อสารเส้นทางเติบโตและการอบรมทำให้คะแนนรวมเพิ่มขึ้นต่อเนื่อง 3 ไตรมาส',
+          advanced: 'Pearson\'s r = 0.69 ระบุว่าการลงทุนด้าน Career Path เชื่อมโยงกับคะแนนรวม โดยหน่วยที่มีโครงการอบรมต่อเนื่องมีคะแนนเพิ่มเฉลี่ย ~4 จุด'
+        }
       },
       {
         dimension: 'ความสมดุลชีวิตกับงาน',
         correlation: -0.63,
         effect: 'negative',
-        insight: 'หน่วยที่พนักงานรู้สึกพักไม่พอมีคะแนนรวมต่ำกว่าค่าเฉลี่ย 7 จุด'
+        insight: {
+          easy: 'หน่วยที่พนักงานรู้สึกพักไม่พอมีคะแนนรวมต่ำกว่าค่าเฉลี่ย 7 จุด',
+          advanced: 'Pearson\'s r = -0.63 แสดงว่าความไม่สมดุลชีวิต-งานลดคะแนนรวมเฉลี่ย ~7 จุด และเพิ่มค่าส่วนเบี่ยงเบนมาตรฐานของความพึงพอใจ'
+        }
       },
       {
         dimension: 'ภาระงานและทรัพยากร',
         correlation: -0.58,
         effect: 'negative',
-        insight: 'คะแนนภาระงานตึง (Relax <60%) สัมพันธ์กับคะแนนรวมต่ำและการร้องเรียนด้านคุณภาพ'
+        insight: {
+          easy: 'คะแนนภาระงานตึง (Relax <60%) สัมพันธ์กับคะแนนรวมต่ำและการร้องเรียนด้านคุณภาพ',
+          advanced: 'Pearson\'s r = -0.58 สะท้อนความสัมพันธ์เชิงลบ โดยหน่วยที่มีคะแนน Relax <60% มีคะแนนรวมต่ำกว่าค่าเฉลี่ย 4-5 จุดและมีอัตราร้องเรียนสูงขึ้น'
+        }
       },
       {
         dimension: 'ความยุติธรรมของรางวัล',
         correlation: -0.66,
         effect: 'negative',
-        insight: 'ความรู้สึกว่าแรงจูงใจไม่เป็นธรรมลากคะแนนรวมลงเฉลี่ย 6 จุดและเพิ่มแนวโน้มลาออก'
+        insight: {
+          easy: 'ความรู้สึกว่าแรงจูงใจไม่เป็นธรรมลากคะแนนรวมลงเฉลี่ย 6 จุดและเพิ่มแนวโน้มลาออก',
+          advanced: 'Pearson\'s r = -0.66 ระบุว่าการรับรู้ความยุติธรรมต่ำลดคะแนนรวมเฉลี่ย ~6 จุด และสัมพันธ์กับแนวโน้มลาออกที่สูงขึ้นอย่างมีนัยสำคัญ'
+        }
       }
     ];
 
@@ -3491,6 +3779,7 @@
         wrapper.className = 'correlation-item';
         const scoreClass = isNegative ? 'correlation-score negative' : 'correlation-score';
         const percentage = Math.round(Math.abs(item.correlation) * 100);
+        const insightContent = typeof item.insight === 'object' ? item.insight : { easy: item.insight, advanced: item.insight };
         wrapper.innerHTML = `
           <strong>${item.dimension}</strong>
           <div class="correlation-score-wrapper">
@@ -3499,8 +3788,9 @@
           <div class="correlation-bar">
             <span class="${isNegative ? 'negative' : ''}" style="width: ${percentage}%;"></span>
           </div>
-          <p class="hint">${item.insight}</p>
+          ${createDescriptionMarkup(insightContent.easy, insightContent.advanced, { tag: 'p', classes: ['hint'] })}
         `;
+        activateDescriptionToggles(wrapper);
         listElement.appendChild(wrapper);
       });
     }
@@ -3511,12 +3801,17 @@
     if (positives.length && negatives.length) {
       const topPositive = positives[0];
       const topNegative = negatives[0];
+      const easyCorrelationSummary = `มิติที่สัมพันธ์สูงสุดกับคะแนนรวมคือ <strong>${topPositive.dimension}</strong> (r = ${topPositive.correlation.toFixed(2)}) หากเพิ่มคะแนนด้านนี้ทุก 5 จุดจะดันคะแนนรวมเฉลี่ย +3 จุด ขณะที่ความเสี่ยงหลักคือ <strong>${topNegative.dimension}</strong> (r = ${topNegative.correlation.toFixed(2)}) ซึ่งเมื่อคะแนนต่ำกว่า 70% จะดึงคะแนนรวมลงเฉลี่ย 6 จุด`;
+      const advancedCorrelationSummary = `Pearson\'s r สูงสุด = ${topPositive.correlation.toFixed(2)} สำหรับ ${topPositive.dimension} ชี้ว่าการเพิ่มคะแนน 1 SD ยกระดับคะแนนรวมราว +3 จุด ส่วนค่าลบเด่นคือ ${topNegative.dimension} (r = ${topNegative.correlation.toFixed(2)}) เมื่อคะแนนต่ำกว่า 70% ค่าเฉลี่ยรวมลดลงประมาณ 6 จุดและเพิ่มความเสี่ยงลาออก`;
       correlationSummary.innerHTML = `
         <span class="metric-title">สรุป</span>
         <span class="metric-value">${topPositive.dimension} vs ${topNegative.dimension}</span>
-        <p class="metric-desc">มิติที่สัมพันธ์สูงสุดกับคะแนนรวมคือ <strong>${topPositive.dimension}</strong> (r = ${topPositive.correlation.toFixed(2)}) หากเพิ่มคะแนนด้านนี้ทุก 5 จุดจะดันคะแนนรวมเฉลี่ย +3 จุด ขณะที่ความเสี่ยงหลักคือ <strong>${topNegative.dimension}</strong> (r = ${topNegative.correlation.toFixed(2)}) ซึ่งเมื่อคะแนนต่ำกว่า 70% จะดึงคะแนนรวมลงเฉลี่ย 6 จุด</p>
+        ${createDescriptionMarkup(easyCorrelationSummary, advancedCorrelationSummary, { tag: 'p', classes: ['metric-desc'] })}
       `;
+      activateDescriptionToggles(correlationSummary);
     }
+
+    activateDescriptionToggles();
   </script>
 </body>
 </html>
