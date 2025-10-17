@@ -191,6 +191,76 @@
       line-height: 1.5;
     }
 
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .kpi-tile {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      padding: 18px 20px;
+      border: 1px solid rgba(44, 61, 122, 0.1);
+      box-shadow: 0 10px 24px rgba(31, 42, 68, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-tile.good {
+      background: rgba(43, 177, 168, 0.18);
+      border-color: rgba(43, 177, 168, 0.45);
+    }
+
+    .kpi-tile.warning {
+      background: rgba(255, 205, 75, 0.2);
+      border-color: rgba(255, 205, 75, 0.45);
+    }
+
+    .kpi-tile.risk {
+      background: rgba(255, 138, 91, 0.2);
+      border-color: rgba(255, 138, 91, 0.45);
+    }
+
+    .kpi-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(31, 42, 68, 0.12);
+    }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .kpi-target {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .kpi-status {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .kpi-note {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
     .description-toggle {
       position: relative;
       display: flex;
@@ -1087,6 +1157,60 @@
     </nav>
 
     <section id="overview" class="panel active">
+      <div class="card">
+        <h2>Core Workforce KPIs</h2>
+        <div class="kpi-grid">
+          <div class="kpi-tile" id="kpiSatisfactionTile">
+            <div class="kpi-header">
+              <span class="metric-title">Average employee satisfaction</span>
+              <span class="kpi-target" id="kpiSatisfactionTarget">≥80%</span>
+            </div>
+            <div class="kpi-value" id="kpiSatisfactionValue">—</div>
+            <div class="kpi-status" id="kpiSatisfactionStatus">กำลังคำนวณ...</div>
+            <p class="kpi-note description-toggle" id="kpiSatisfactionNote">
+              <span class="description-text description-easy">กำลังคำนวณ</span>
+              <span class="description-text description-advanced">กำลังคำนวณ</span>
+            </p>
+          </div>
+          <div class="kpi-tile" id="kpiEngagementTile">
+            <div class="kpi-header">
+              <span class="metric-title">Average employee engagement</span>
+              <span class="kpi-target" id="kpiEngagementTarget">≥75%</span>
+            </div>
+            <div class="kpi-value" id="kpiEngagementValue">—</div>
+            <div class="kpi-status" id="kpiEngagementStatus">กำลังคำนวณ...</div>
+            <p class="kpi-note description-toggle" id="kpiEngagementNote">
+              <span class="description-text description-easy">กำลังคำนวณ</span>
+              <span class="description-text description-advanced">กำลังคำนวณ</span>
+            </p>
+          </div>
+          <div class="kpi-tile" id="kpiTurnoverTile">
+            <div class="kpi-header">
+              <span class="metric-title">Nurse turnover rate</span>
+              <span class="kpi-target" id="kpiTurnoverTarget">≤5%</span>
+            </div>
+            <div class="kpi-value" id="kpiTurnoverValue">—</div>
+            <div class="kpi-status" id="kpiTurnoverStatus">กำลังคำนวณ...</div>
+            <p class="kpi-note description-toggle" id="kpiTurnoverNote">
+              <span class="description-text description-easy">กำลังคำนวณ</span>
+              <span class="description-text description-advanced">กำลังคำนวณ</span>
+            </p>
+          </div>
+          <div class="kpi-tile" id="kpiAbsenceTile">
+            <div class="kpi-header">
+              <span class="metric-title">Absence rate</span>
+              <span class="kpi-target" id="kpiAbsenceTarget">≤3%</span>
+            </div>
+            <div class="kpi-value" id="kpiAbsenceValue">—</div>
+            <div class="kpi-status" id="kpiAbsenceStatus">กำลังคำนวณ...</div>
+            <p class="kpi-note description-toggle" id="kpiAbsenceNote">
+              <span class="description-text description-easy">กำลังคำนวณ</span>
+              <span class="description-text description-advanced">กำลังคำนวณ</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <h2>ค่าเด่นจาก Happinometer และความผูกพัน</h2>
         <div class="grid-3">
@@ -2672,6 +2796,291 @@
       environment: 'สิ่งแวดล้อมการทำงาน',
       growth: 'โอกาสเติบโต'
     };
+
+    const numberFormatter = new Intl.NumberFormat('th-TH');
+
+    function formatInteger(value) {
+      return numberFormatter.format(Math.round(value));
+    }
+
+    function formatPercentageWithDecimals(value, decimals = 1) {
+      if (!Number.isFinite(value)) {
+        return '—';
+      }
+      return `${value.toFixed(decimals)}%`;
+    }
+
+    function evaluateKpi(value, target, higherIsBetter) {
+      if (!Number.isFinite(value) || !Number.isFinite(target)) {
+        return {
+          meetsTarget: false,
+          difference: Number.NaN,
+          diffAbs: Number.NaN,
+          higherIsBetter
+        };
+      }
+      const difference = value - target;
+      const meetsTarget = higherIsBetter ? difference >= 0 : difference <= 0;
+      return {
+        meetsTarget,
+        difference,
+        diffAbs: Math.abs(difference),
+        higherIsBetter
+      };
+    }
+
+    function formatDifferenceText(evaluation, decimals = 1) {
+      if (!Number.isFinite(evaluation.diffAbs)) {
+        return 'ข้อมูลไม่ครบ';
+      }
+      const threshold = Math.pow(10, -decimals) / 2;
+      if (evaluation.diffAbs < threshold) {
+        return 'เท่ากับเป้าหมาย';
+      }
+      const diffLabel = evaluation.diffAbs.toFixed(decimals);
+      if (evaluation.meetsTarget) {
+        return evaluation.higherIsBetter
+          ? `สูงกว่าเป้าหมาย ${diffLabel} จุด`
+          : `ต่ำกว่าเพดาน ${diffLabel} จุด`;
+      }
+      return evaluation.higherIsBetter
+        ? `ต่ำกว่าเป้าหมาย ${diffLabel} จุด`
+        : `สูงกว่าเพดาน ${diffLabel} จุด`;
+    }
+
+    function determineKpiTone(evaluation, warningThreshold = 1) {
+      if (!Number.isFinite(evaluation.diffAbs)) {
+        return 'warning';
+      }
+      if (evaluation.meetsTarget) {
+        return 'good';
+      }
+      return evaluation.diffAbs <= warningThreshold ? 'warning' : 'risk';
+    }
+
+    function updateKpiTile(config) {
+      const {
+        element,
+        value,
+        target,
+        higherIsBetter,
+        decimals = 1,
+        targetDecimals = 0,
+        diffDecimals = 1,
+        warningThreshold = 1,
+        descriptionBuilder
+      } = config;
+
+      if (!element || !element.tile || !element.value || !element.status) {
+        return;
+      }
+
+      if (!Number.isFinite(value)) {
+        element.value.textContent = '—';
+        if (element.target) {
+          element.target.textContent = `${higherIsBetter ? '≥' : '≤'}${target.toFixed(targetDecimals)}%`;
+        }
+        element.status.textContent = 'ข้อมูลไม่ครบ';
+        if (element.note) {
+          applyDescriptionContent(
+            element.note,
+            'ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณตัวชี้วัดนี้',
+            'ต้องบันทึกข้อมูลให้ครบก่อนจึงจะคำนวณ KPI ได้'
+          );
+        }
+        element.tile.classList.remove('good', 'warning', 'risk');
+        element.tile.classList.add('warning');
+        return;
+      }
+
+      element.value.textContent = formatPercentageWithDecimals(value, decimals);
+
+      if (element.target) {
+        element.target.textContent = `${higherIsBetter ? '≥' : '≤'}${target.toFixed(targetDecimals)}%`;
+      }
+
+      const evaluation = evaluateKpi(value, target, higherIsBetter);
+      const diffText = formatDifferenceText(evaluation, diffDecimals);
+      const tone = determineKpiTone(evaluation, warningThreshold);
+
+      element.tile.classList.remove('good', 'warning', 'risk');
+      element.tile.classList.add(tone);
+
+      if (diffText === 'เท่ากับเป้าหมาย') {
+        element.status.textContent = evaluation.meetsTarget
+          ? 'ผ่านเกณฑ์ (เท่ากับเป้าหมาย)'
+          : 'ต้องเร่งปรับ (เท่ากับเป้าหมาย)';
+      } else if (diffText === 'ข้อมูลไม่ครบ') {
+        element.status.textContent = 'ข้อมูลไม่ครบ';
+      } else {
+        element.status.innerHTML = `${evaluation.meetsTarget ? 'ผ่านเกณฑ์' : 'ต้องเร่งปรับ'} <span class="trend-indicator">${diffText}</span>`;
+      }
+
+      if (element.note && typeof descriptionBuilder === 'function') {
+        const descriptions = descriptionBuilder(evaluation);
+        applyDescriptionContent(element.note, descriptions.easy, descriptions.advanced);
+      }
+    }
+
+    const workforceKpiInput = {
+      averageHeadcount: 850,
+      leavers: 53,
+      absenceRecords: [
+        { type: 'ลาป่วย', days: 3120 },
+        { type: 'ลากิจ', days: 1680 },
+        { type: 'อื่น ๆ', days: 480 }
+      ],
+      scheduledDays: 850 * 260
+    };
+
+    const kpiElements = {
+      satisfaction: {
+        tile: document.getElementById('kpiSatisfactionTile'),
+        value: document.getElementById('kpiSatisfactionValue'),
+        status: document.getElementById('kpiSatisfactionStatus'),
+        note: document.getElementById('kpiSatisfactionNote'),
+        target: document.getElementById('kpiSatisfactionTarget')
+      },
+      engagement: {
+        tile: document.getElementById('kpiEngagementTile'),
+        value: document.getElementById('kpiEngagementValue'),
+        status: document.getElementById('kpiEngagementStatus'),
+        note: document.getElementById('kpiEngagementNote'),
+        target: document.getElementById('kpiEngagementTarget')
+      },
+      turnover: {
+        tile: document.getElementById('kpiTurnoverTile'),
+        value: document.getElementById('kpiTurnoverValue'),
+        status: document.getElementById('kpiTurnoverStatus'),
+        note: document.getElementById('kpiTurnoverNote'),
+        target: document.getElementById('kpiTurnoverTarget')
+      },
+      absence: {
+        tile: document.getElementById('kpiAbsenceTile'),
+        value: document.getElementById('kpiAbsenceValue'),
+        status: document.getElementById('kpiAbsenceStatus'),
+        note: document.getElementById('kpiAbsenceNote'),
+        target: document.getElementById('kpiAbsenceTarget')
+      }
+    };
+
+    const satisfactionItemValues = satisfactionDimensionData.flatMap(item =>
+      satisfactionDimensionKeys.map(key => item[key] / 100)
+    );
+    const satisfactionIndex = satisfactionItemValues.length
+      ? calculateAverage(satisfactionItemValues) * 100
+      : Number.NaN;
+    const satisfactionUnitCount = satisfactionDimensionData.length;
+    const satisfactionDimensionCount = satisfactionDimensionKeys.length;
+
+    const engagementItemValues = Object.values(unitsData)
+      .map(data => parsePercentageValue(data.engagement))
+      .filter(Number.isFinite)
+      .map(value => value / 100);
+    const engagementIndex = engagementItemValues.length
+      ? calculateAverage(engagementItemValues) * 100
+      : Number.NaN;
+    const engagementUnitCount = engagementItemValues.length;
+
+    const totalLeavers = workforceKpiInput.leavers;
+    const turnoverRate = workforceKpiInput.averageHeadcount > 0
+      ? (totalLeavers / workforceKpiInput.averageHeadcount) * 100
+      : Number.NaN;
+
+    const totalAbsenceDays = workforceKpiInput.absenceRecords.reduce(
+      (sum, record) => sum + record.days,
+      0
+    );
+    const absenceRate = workforceKpiInput.scheduledDays > 0
+      ? (totalAbsenceDays / workforceKpiInput.scheduledDays) * 100
+      : Number.NaN;
+    const absenceBreakdown = workforceKpiInput.absenceRecords
+      .map(record => ({
+        ...record,
+        percentage: totalAbsenceDays ? (record.days / totalAbsenceDays) * 100 : 0
+      }))
+      .sort((a, b) => b.days - a.days);
+
+    updateKpiTile({
+      element: kpiElements.satisfaction,
+      value: satisfactionIndex,
+      target: 80,
+      higherIsBetter: true,
+      warningThreshold: 1,
+      descriptionBuilder: evaluation => {
+        const diffText = formatDifferenceText(evaluation, 1);
+        const easy = diffText === 'เท่ากับเป้าหมาย'
+          ? `คะแนนเฉลี่ยความพึงพอใจทั้งองค์กร ${formatPercentageWithDecimals(satisfactionIndex)} เท่ากับเป้าหมาย 80%`
+          : `คะแนนเฉลี่ยความพึงพอใจทั้งองค์กร ${formatPercentageWithDecimals(satisfactionIndex)} ${diffText}`;
+        const rawMean = satisfactionIndex / 100;
+        const advanced = `Mean of satisfaction items × 100: ค่าเฉลี่ยดิบ ${rawMean.toFixed(3)} จาก ${formatInteger(satisfactionItemValues.length)} รายการ (${satisfactionDimensionCount} มิติ × ${satisfactionUnitCount} หน่วย) คูณ 100 ได้ ${formatPercentageWithDecimals(satisfactionIndex, 2)} เทียบกับเป้าหมาย ${formatPercentageWithDecimals(80, 0)}.`;
+        return { easy, advanced };
+      }
+    });
+
+    updateKpiTile({
+      element: kpiElements.engagement,
+      value: engagementIndex,
+      target: 75,
+      higherIsBetter: true,
+      warningThreshold: 1,
+      descriptionBuilder: evaluation => {
+        const diffText = formatDifferenceText(evaluation, 1);
+        const easy = diffText === 'เท่ากับเป้าหมาย'
+          ? `คะแนนผูกพันเฉลี่ย ${formatPercentageWithDecimals(engagementIndex)} เท่ากับเป้าหมาย 75%`
+          : `คะแนนผูกพันเฉลี่ย ${formatPercentageWithDecimals(engagementIndex)} ${diffText}`;
+        const rawMean = engagementIndex / 100;
+        const advanced = `Mean of engagement items × 100: ค่าเฉลี่ยดิบ ${rawMean.toFixed(3)} จาก ${formatInteger(engagementUnitCount)} หน่วย (คูณ 100 = ${formatPercentageWithDecimals(engagementIndex, 2)}) เทียบกับเป้าหมาย ${formatPercentageWithDecimals(75, 0)}.`;
+        return { easy, advanced };
+      }
+    });
+
+    updateKpiTile({
+      element: kpiElements.turnover,
+      value: turnoverRate,
+      target: 5,
+      higherIsBetter: false,
+      warningThreshold: 0.5,
+      descriptionBuilder: evaluation => {
+        const diffText = formatDifferenceText(evaluation, 1);
+        const easy = diffText === 'เท่ากับเป้าหมาย'
+          ? `อัตราการลาออก ${formatPercentageWithDecimals(turnoverRate)} เท่ากับเพดาน 5%`
+          : `อัตราการลาออก ${formatPercentageWithDecimals(turnoverRate)} ${diffText}`;
+        const advanced = `คำนวณจาก ${formatInteger(totalLeavers)} ÷ ${formatInteger(workforceKpiInput.averageHeadcount)} × 100 = ${formatPercentageWithDecimals(turnoverRate, 2)} โดยใช้เกณฑ์ ≤${formatPercentageWithDecimals(5, 0)} สำหรับพยาบาล.`;
+        return { easy, advanced };
+      }
+    });
+
+    updateKpiTile({
+      element: kpiElements.absence,
+      value: absenceRate,
+      target: 3,
+      higherIsBetter: false,
+      warningThreshold: 0.3,
+      descriptionBuilder: evaluation => {
+        const diffText = formatDifferenceText(evaluation, 1);
+        const topCause = absenceBreakdown[0];
+        const easyParts = [`อัตราการขาดงาน ${formatPercentageWithDecimals(absenceRate)}`];
+        if (diffText === 'เท่ากับเป้าหมาย') {
+          easyParts.push(`เท่ากับเพดาน ${formatPercentageWithDecimals(3, 0)}`);
+        } else {
+          easyParts.push(diffText);
+        }
+        if (topCause) {
+          easyParts.push(`สัดส่วนสูงสุดคือ ${topCause.type} ${formatInteger(topCause.days)} วัน (${formatPercentageWithDecimals(topCause.percentage, 1)})`);
+        }
+        const easy = easyParts.join(' • ');
+
+        const breakdownText = absenceBreakdown.length
+          ? absenceBreakdown
+              .map(record => `${record.type} ${formatInteger(record.days)} วัน (${formatPercentageWithDecimals(record.percentage, 1)})`)
+              .join(', ')
+          : 'ไม่มีข้อมูลวันลา';
+
+        const advanced = `วันลารวม ${formatInteger(totalAbsenceDays)} วัน ÷ วันทำงานตามตาราง ${formatInteger(workforceKpiInput.scheduledDays)} วัน × 100 = ${formatPercentageWithDecimals(absenceRate, 2)} (เป้าหมาย ≤${formatPercentageWithDecimals(3, 0)}). รายละเอียด: ${breakdownText}.`;
+        return { easy, advanced };
+      }
+    });
 
     const heatmapLowColor = [255, 138, 91];
     const heatmapHighColor = [43, 177, 168];
